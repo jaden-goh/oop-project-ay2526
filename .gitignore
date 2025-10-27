@@ -1,0 +1,28 @@
+
+# IntelliJ IDEA
+
+.idea/
+*.iml
+out/
+target/
+shelf/
+workspace.xml
+
+
+# OS / Editor junk
+
+.DS_Store
+Thumbs.db
+
+
+# Java build
+
+*.class
+*.jar
+*.war
+*.ear
+
+
+# Logs and temp
+
+*.log
