@@ -7,9 +7,18 @@ public class Student extends User {
         this.year = year;
         this.major = major;
     }
-    public boolean viewOpportunities() { return true; }
-    public void applyIntern() { }
-    public void viewInternship() { }
-    public void requestWithdrawal() { }
+
+    public int getYear() { return year; }
+    public void setYear(int year) { this.year = year; }
+
+    public String getMajor() { return major; }
+    public void setMajor(String major) { this.major = major; }
+
+    // functions
+    public boolean viewOpportunities() { return false; }
+    public boolean applyInternship(Internship internship) { return false; }
+    public boolean acceptOffer(Application application) { return false; }
+    public boolean reqWithdrawal(Application application) { return false; }
+    public boolean canApply() { return false; }
 }
 
