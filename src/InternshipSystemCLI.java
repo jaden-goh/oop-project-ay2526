@@ -32,5 +32,9 @@ public class InternshipSystemCLI {
     public boolean approveApplication(Application application) { return false; }
     public boolean rejectApplication(Application application) { return false; }
     public java.util.List<Application> viewApplications(Internship internship) { return null; }
+
+    public static void main(String[] args){
+        
+    }
 }
 
