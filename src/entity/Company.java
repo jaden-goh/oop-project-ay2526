@@ -1,3 +1,4 @@
+package entity;
 public class Company {
     private String companyName;
     private int numInternships;

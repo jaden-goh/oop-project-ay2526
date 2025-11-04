@@ -1,4 +1,10 @@
+package boundary;
+import entity.*;
+import control.*;
+
 import java.util.ArrayList;
+
+import control.InternshipManager;
 
 public class InternshipSystemCLI {
     private ArrayList<User> users = new ArrayList<>();

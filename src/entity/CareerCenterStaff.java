@@ -1,3 +1,4 @@
+package entity;
 public class CareerCenterStaff extends User {
     public CareerCenterStaff(String id, String name, String password) {
         super(id, name, password);

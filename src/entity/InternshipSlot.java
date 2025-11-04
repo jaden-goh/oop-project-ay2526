@@ -1,3 +1,4 @@
+package entity;
 public class InternshipSlot {
     private int slotID;
     private String status;

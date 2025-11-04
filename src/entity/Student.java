@@ -1,3 +1,5 @@
+package entity;
+
 public class Student extends User {
     private int year;
     private String major;
