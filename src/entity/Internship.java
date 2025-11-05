@@ -8,6 +8,7 @@ public class Internship {
     private String description;
     private String level;
     private String preferredMajor;
+    private InternshipStatus status;
     private Date openDate;
     private Date closeDate;
     private boolean visibility;
@@ -17,7 +18,7 @@ public class Internship {
     private CompanyRep rep;
 
     private int numSlots;
-    private ArrayList<InternshipSlot> slots = new ArrayList<>();
+    private ArrayList<InternshipSlot> slots = new ArrayList<>(numSlots);
 
     public Internship() {}
 
@@ -32,6 +33,15 @@ public class Internship {
 
     public String getPreferredMajor() { return preferredMajor; }
     public void setPreferredMajor(String preferredMajor) { this.preferredMajor = preferredMajor; }
+
+    public InternshipStatus getStatus() { return this.status; }
+    public void setStatus(String statusStr) {
+    try {
+        this.status = InternshipStatus.valueOf(statusStr.toUpperCase());
+    } catch (IllegalArgumentException e) {
+        System.err.println("Invalid status: " + statusStr);
+    }
+}
 
     public Date getOpenDate() { return openDate; }
     public void setOpenDate(Date openDate) { this.openDate = openDate; }
@@ -58,8 +68,43 @@ public class Internship {
     public void setSlots(ArrayList<InternshipSlot> slots) { this.slots = slots != null ? slots : new ArrayList<>(); }
 
     // functions
-    public void addSlot(InternshipSlot internshipSlot) { }
-    public boolean isOpen() { return false; }
-    public boolean assignStudent(Application application) { return false; }
-    public boolean hasFilled() { return false; }
+
+    public void addSlot(InternshipSlot internshipSlot) {
+        if (!isFull()) {
+            this.slots.add(internshipSlot);
+        }
+    }
+
+    public boolean isOpen() {
+        Date now = new Date();
+        return visibility &&
+            approved &&
+            status == InternshipStatus.APPROVED &&
+            now.compareTo(openDate) >= 0 &&
+            now.compareTo(closeDate) <= 0;
+    }
+
+    public boolean assignStudent(Application application) {
+        for (InternshipSlot slot : slots) {
+            if (!slot.isFilled()) {
+                slot.assignStudent(application);
+                return true;
+            }
+        }
+        return false; // No empty slot found
+    }
+
+    public boolean isFull() {
+        for (InternshipSlot slot : slots) {
+            if (!slot.isFilled()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void updateStatus(InternshipStatus newStatus) {
+        this.status = newStatus;
 }
+
+}   
