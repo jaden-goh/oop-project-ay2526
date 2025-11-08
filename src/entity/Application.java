@@ -1,4 +1,5 @@
 package entity;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Objects;
 import entity.ApplicationStatus;
@@ -6,8 +7,9 @@ import entity.ApplicationStatus;
 public class Application {
     private String applicationID;
     private ApplicationStatus status = ApplicationStatus.PENDING;  // default pending
-    private Date dateApplied;
+    private LocalDate dateApplied;
     private boolean accepted;
+    private boolean withdrawalRequested;
     private boolean withdrawn;
     private Student student;
     private Internship internship;
@@ -15,7 +17,7 @@ public class Application {
     //public Application() {}
 
     // constructor class
-    public Application(String applicationID, Student student, Internship internship, Date dateApplied) {
+    public Application(String applicationID, Student student, Internship internship, LocalDate dateApplied) {
         this.applicationID = Objects.requireNonNull(applicationID, "Application ID cannot be null");
         this.student = Objects.requireNonNull(student, "Student cannot be null");
         this.internship = Objects.requireNonNull(internship, "Internship cannot be null");
@@ -35,11 +37,13 @@ public class Application {
         if (status != null) { this.status = status; }
     }
 
-    public Date getDateApplied() { return dateApplied; }
-    public void setDateApplied(Date dateApplied) { this.dateApplied = dateApplied; }
+    public LocalDate getDateApplied() { return dateApplied; }
+    public void setDateApplied(LocalDate dateApplied) { this.dateApplied = dateApplied; }
 
     public boolean isAccepted() { return accepted; }
     public void setAccepted(boolean accepted) { this.accepted = accepted; }
+
+    public boolean isWithdrawalRequested() { return withdrawalRequested; }
 
     public boolean isWithdrawn() { return withdrawn; }
     public void setWithdrawn(boolean withdrawn) { this.withdrawn = withdrawn; }
@@ -65,15 +69,26 @@ public class Application {
     }
 
     public boolean requestWithdrawal() {
-        if (!withdrawn){
-            withdrawn = true;
-            return true;
-        }
-
-        return false;
+        if (withdrawalRequested || withdrawn) return false;
+        withdrawalRequested = true;
+        return true;
     }
+
+    public boolean approveWithdrawal() {
+        if (withdrawalRequested || withdrawn) return false;
+        withdrawn = true;
+        withdrawalRequested = false;
+        return true;
+    }
+
+    public boolean rejectWithdrawal() {
+        if (!withdrawalRequested) return false;
+        withdrawalRequested = false;
+        return true;
+    }
+
+
     public boolean isPending() {
         return status == ApplicationStatus.PENDING;
     }
 }
-
