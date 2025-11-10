@@ -25,7 +25,8 @@ public class Company {
     public void addRep(CompanyRep rep) {
         
         // ignore if null 
-        if (rep == null) return;
+        if (rep == null) 
+            { return; }
         
         // prevent duplicates i.e. same rep from behind added twice 
         if (!reps.contains(rep)) {
@@ -41,7 +42,8 @@ public class Company {
     public void addInternship(Internship internship) {
         
         // ignore if null
-        if (internship == null) return;
+        if (internship == null) 
+            { return; }
 
         // prevent duplicates i.e. same rep from behind added twice 
         if (!internships.contains(internship)) {
