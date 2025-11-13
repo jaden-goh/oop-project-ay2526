@@ -28,7 +28,6 @@ public class InternshipSystemCLI {
     public User getCurrentUser() { return currentUser; }
     public void setCurrentUser(User currentUser) { this.currentUser = currentUser; }
 
-    // functions
     public void loadInitialData() {
         List<Student> students = loader.loadStudents();
         List<CareerCenterStaff> staff = loader.loadStaff();
@@ -36,40 +35,6 @@ public class InternshipSystemCLI {
         users.addAll(students);
         users.addAll(staff);
         users.addAll(reps);
-    }
-
-    public void run() {
-        System.out.println("Welcome to the Internship Management System CLI");
-        displayLoginMenu();
-    }
-    public void displayLoginMenu() { // main menu, select user type
-        boolean running = true;
-        while (running) {
-            System.out.println("\nSelect user type:");
-            System.out.println("1. Student");
-            System.out.println("2. Company Representative");
-            System.out.println("3. Career Center Staff");
-            System.out.println("0. Exit");
-            System.out.print("Choice: ");
-            String choice = scanner.nextLine().trim();
-            switch (choice) {
-                case "1":
-                    handleStudentLogin();
-                    break;
-                case "2":
-                    handleCompanyRepLogin();
-                    break;
-                case "3":
-                    handleCareerStaffLogin();
-                    break;
-                case "0":
-                    running = false;
-                    break;
-                default: //error handling
-                    System.out.println("Invalid choice. Try again.");
-            }
-        }
-        System.out.println("Goodbye.");
     }
     public void displayStudentMenu() { }
     public void displayRepMenu() { }
@@ -253,6 +218,33 @@ public class InternshipSystemCLI {
     public static void main(String[] args){
         InternshipSystemCLI cli = new InternshipSystemCLI();
         cli.loadInitialData();
-        cli.run();
+        System.out.println("Welcome to the Internship Management System.");
+        boolean running = true;
+        while (running) {
+            System.out.println("\nSelect user type:");
+            System.out.println("1. Student");
+            System.out.println("2. Company Representative");
+            System.out.println("3. Career Center Staff");
+            System.out.println("0. Exit");
+            System.out.print("Choice: ");
+            String choice = cli.scanner.nextLine().trim();
+            switch (choice) {
+                case "1":
+                    cli.handleStudentLogin();
+                    break;
+                case "2":
+                    cli.handleCompanyRepLogin();
+                    break;
+                case "3":
+                    cli.handleCareerStaffLogin();
+                    break;
+                case "0":
+                    running = false;
+                    break;
+                default:
+                    System.out.println("Invalid choice. Try again.");
+            }
+        }
+        System.out.println("Goodbye.");
     }
 }
