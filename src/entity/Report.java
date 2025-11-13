@@ -7,7 +7,7 @@ public class Report {
     private Predicate<Internship> filterCriteria;
     private ArrayList<Internship> resultList = new ArrayList<>();
 
-    public String getFilterCriteria() { return filterCriteria; }
+    public Predicate<Internship> getFilterCriteria() { return filterCriteria; }
     public void setFilterCriteria(Predicate<Internship> filterCriteria) { this.filterCriteria = filterCriteria; }
 
     public ArrayList<Internship> getResultList() { return resultList; }
@@ -25,7 +25,7 @@ public class Report {
             System.out.println("Description: " + i.getDescription());
             System.out.println("Level: " + i.getLevel());
             System.out.println("Preferred Major: " + i.getPreferredMajor());
-            System.out.println("Company: " + (i.getCompany() != null ? i.getCompany().getName() : "N/A"));
+            System.out.println("Company: " + (i.getCompany() != null ? i.getCompany().getCompanyName() : "N/A"));
             System.out.println("Representative: " + (i.getRep() != null ? i.getRep().getName() : "N/A"));
             System.out.println("Slots: " + i.getNumSlots());
             System.out.println("Approved: " + (i.isApproved() ? "Yes" : "No"));
@@ -48,7 +48,6 @@ public class Report {
         }
     }
 
-    display(); 
 }
 
 }

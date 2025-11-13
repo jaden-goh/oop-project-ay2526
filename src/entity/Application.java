@@ -66,6 +66,12 @@ public class Application {
     // Accepts only if status = accepted
     public void markAccepted() {
         this.accepted = true;
+        this.status = ApplicationStatus.SUCCESSFUL;
+    }
+
+    public void markRejected() {
+        this.accepted = false;
+        this.status = ApplicationStatus.UNSUCCESSFUL;
     }
 
     public boolean requestWithdrawal() {

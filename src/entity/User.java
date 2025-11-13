@@ -1,4 +1,7 @@
 package entity;
+
+import java.util.Scanner;
+
 public abstract class User {
     private String id;
     private String name;
@@ -19,6 +22,18 @@ public abstract class User {
 
     public boolean login() { return true; }
     public boolean verifyPassword(String password) { return true; }
-    public void setPassword(String oldPw, String newPw) { }
+    public void changePassword(String oldPw,String newPw) {
+        System.out.println("Enter old password: ");
+        Scanner scanner = new Scanner(System.in);
+        String pw = scanner.nextLine(); 
+        if (!pw.equals(oldPw)) {
+            System.out.println("Incorrect old password. Password change failed.");
+            return;
+        }
+        else {
+            System.out.println("Password changed successfully.");
+            this.password = newPw;
+        }
+    }
 }
 
