@@ -3,6 +3,10 @@ import java.util.ArrayList;
 
 public class CompanyRep extends User {
     private Company company; // owning company
+    private String name;
+    private String department;
+    private String position;
+    private String email;
     private boolean authorised; // false until staff authorises
     private ArrayList<Internship> internships; // postings created by this rep
 
