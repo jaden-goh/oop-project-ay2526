@@ -185,12 +185,12 @@ public class CompanyRep extends User {
         Application selected = applications.get(appChoice - 1);
         System.out.print("Approve (A) or Reject (R): ");
         String decision = scanner.nextLine().trim().toUpperCase();
-        if ("A".equals(decision)) {
-            System.out.println(approveApplication(selected) ? "Application approved." : "Unable to approve application.");
-        } else if ("R".equals(decision)) {
-            System.out.println(rejectApplication(selected) ? "Application rejected." : "Unable to reject application.");
-        } else {
+        if (null == decision) {
             System.out.println("Invalid action.");
+        } else switch (decision) {
+            case "A" -> System.out.println(approveApplication(selected) ? "Application approved." : "Unable to approve application.");
+            case "R" -> System.out.println(rejectApplication(selected) ? "Application rejected." : "Unable to reject application.");
+            default -> System.out.println("Invalid action.");
         }
     }
     
