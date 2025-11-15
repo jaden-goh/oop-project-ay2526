@@ -1,6 +1,7 @@
 package control;
 
 import entity.CareerCenterStaff;
+import entity.Company;
 import entity.CompanyRep;
 import entity.Student;
 
@@ -30,9 +31,8 @@ public class UserDataLoader {
                 .collect(Collectors.toList());
     }
 
-    public List<CompanyRep> loadApprovedCompanyReps() {
+    public List<CompanyRep> loadCompanyReps() {
         return readCsv(COMPANY_REP_CSV, 7).stream()
-                .filter(c -> isApproved(c[6]))
                 .map(this::buildRep)
                 .collect(Collectors.toList());
     }
@@ -49,8 +49,16 @@ public class UserDataLoader {
     }
 
     private CompanyRep buildRep(String[] c) {
-        CompanyRep rep = new CompanyRep(c[5].trim(), c[1].trim(), "");
-        rep.setAuthorised(true);
+        String email = c[5].trim();
+        String companyName = c[2].trim();
+        CompanyRep rep = new CompanyRep(email, c[1].trim(), "");
+        rep.setEmail(email);
+        rep.setDepartment(c[3].trim());
+        rep.setPosition(c[4].trim());
+        rep.setAuthorised(isApproved(c[6]));
+        Company company = new Company();
+        company.setCompanyName(companyName);
+        rep.setCompany(company);
         return rep;
     }
 

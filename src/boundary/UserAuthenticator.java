@@ -1,6 +1,7 @@
 package boundary;
 
 import entity.CareerCenterStaff;
+import entity.Company;
 import entity.CompanyRep;
 import entity.Student;
 import entity.User;
@@ -33,12 +34,12 @@ public class UserAuthenticator {
             System.out.println("Invalid student ID.");
             return;
         }
-        System.out.println("Password: ");
         User user = findUserById(id, Student.class);
         if (user == null) {
             System.out.println("Student not found.");
             return;
         }
+        System.out.println("Password: ");
         String password = scanner.nextLine().trim();
         if (!user.verifyPassword(password)){
             System.out.println("Incorrect Password");
@@ -53,12 +54,12 @@ public class UserAuthenticator {
     public void handleCompanyRepLogin() {
         System.out.print("Enter Company Rep email: ");
         String email = scanner.nextLine().trim();
-        System.out.println(("Enter Password: "));
         User user = findUserById(email, CompanyRep.class);
         if (user == null) {
             System.out.println("Company Rep not found.");
             return;
         }
+        System.out.println(("Enter Password: "));
         String password = scanner.nextLine().trim();
         if (!user.verifyPassword(password)){
             System.out.println("Incorrect Password");
@@ -69,6 +70,10 @@ public class UserAuthenticator {
             return;
         }
         String[] record = getCompanyRepRecord(email);
+        if (record == null) {
+            System.out.println("Company record not found. Please contact the career center for assistance.");
+            return;
+        }
         if (!isApprovedStatus(record[6])) {
             System.out.println("Your account is pending approval. Please wait for Career Center Staff to approve your registration.");
             return;
@@ -80,19 +85,19 @@ public class UserAuthenticator {
     public void handleCareerStaffLogin() {
         System.out.print("Enter Career Staff ID: ");
         String email = scanner.nextLine().trim();
-        System.out.print("Password: ");
-        String password  = scanner.nextLine().trim();
+        if (!email.endsWith("@ntu.edu.sg")) {
+            System.out.println("Invalid email format for career staff.");
+            return;
+        }
         User user = findUserById(email, CareerCenterStaff.class);
         if (user == null) {
             System.out.println("Staff not found.");
             return;
         }
+        System.out.print("Password: ");
+        String password  = scanner.nextLine().trim();
         if (!user.verifyPassword(password)){
             System.out.println("Incorrect Password");
-            return;
-        }
-        if (!email.endsWith("@ntu.edu.sg")) {
-            System.out.println("Invalid email format for career staff.");
             return;
         }
         cli.setCurrentUser(user);
@@ -168,7 +173,7 @@ public class UserAuthenticator {
 
             String approved = "false";
 
-            File file = new File("data/sample_company_representative_list``.csv");
+            File file = new File("data/sample_company_representative_list.csv");
             boolean writeHeader = !file.exists() || file.length() == 0;
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
@@ -184,6 +189,15 @@ public class UserAuthenticator {
                 writer.flush();
 
                 System.out.println("Registration completed! Welcome, " + name);
+                CompanyRep newRep = new CompanyRep(email, name, "");
+                newRep.setEmail(email);
+                newRep.setDepartment(department);
+                newRep.setPosition(position);
+                newRep.setAuthorised(false);
+                Company company = new Company();
+                company.setCompanyName(companyname);
+                newRep.setCompany(company);
+                cli.getUsers().add(newRep);
 
             } catch (IOException e) {
                 System.out.println("Error writing student record: " + e.getMessage());
@@ -208,7 +222,7 @@ public class UserAuthenticator {
             System.out.print("Enter Email: ");
             String email = scanner.nextLine().trim();
 
-            File file = new File("data/sample_staff_list``.csv");
+            File file = new File("data/sample_staff_list.csv");
             boolean writeHeader = !file.exists() || file.length() == 0;
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {

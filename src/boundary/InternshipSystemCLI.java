@@ -34,7 +34,7 @@ public class InternshipSystemCLI {
     public void loadInitialData() {
         List<Student> students = loader.loadStudents();
         List<CareerCenterStaff> staff = loader.loadStaff();
-        List<CompanyRep> reps = loader.loadApprovedCompanyReps();
+        List<CompanyRep> reps = loader.loadCompanyReps();
         users.addAll(students);
         users.addAll(staff);
         users.addAll(reps);
