@@ -1,8 +1,6 @@
 package entity;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Objects;
-import entity.ApplicationStatus;
 
 public class Application {
     private String applicationID;
@@ -72,25 +70,6 @@ public class Application {
     public void markRejected() {
         this.accepted = false;
         this.status = ApplicationStatus.UNSUCCESSFUL;
-    }
-
-    public boolean requestWithdrawal() {
-        if (withdrawalRequested || withdrawn) return false;
-        withdrawalRequested = true;
-        return true;
-    }
-
-    public boolean approveWithdrawal() {
-        if (withdrawalRequested || withdrawn) return false;
-        withdrawn = true;
-        withdrawalRequested = false;
-        return true;
-    }
-
-    public boolean rejectWithdrawal() {
-        if (!withdrawalRequested) return false;
-        withdrawalRequested = false;
-        return true;
     }
 
 

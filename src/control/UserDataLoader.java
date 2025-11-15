@@ -4,13 +4,14 @@ import entity.CareerCenterStaff;
 import entity.CompanyRep;
 import entity.Student;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class UserDataLoader {
     private static final String STUDENT_CSV = "data/sample_student_list.csv";
@@ -18,80 +19,42 @@ public class UserDataLoader {
     private static final String COMPANY_REP_CSV = "data/sample_company_representative_list.csv";
 
     public List<Student> loadStudents() {
-        return readStudents(Paths.get(STUDENT_CSV));
+        return readCsv(STUDENT_CSV, 5).stream()
+                .map(c -> new Student(c[0].trim(), c[1].trim(), "", c[3].trim(), c[2].trim()))
+                .collect(Collectors.toList());
     }
 
     public List<CareerCenterStaff> loadStaff() {
-        return readStaff(Paths.get(STAFF_CSV));
+        return readCsv(STAFF_CSV, 5).stream()
+                .map(c -> new CareerCenterStaff(c[0].trim(),c[1].trim(),"password",c[2].trim(),c[3].trim(),c[4].trim()))
+                .collect(Collectors.toList());
     }
 
     public List<CompanyRep> loadApprovedCompanyReps() {
-        return readCompanyReps(Paths.get(COMPANY_REP_CSV));
+        return readCsv(COMPANY_REP_CSV, 7).stream()
+                .filter(c -> isApproved(c[6]))
+                .map(this::buildRep)
+                .collect(Collectors.toList());
     }
 
-    private List<Student> readStudents(Path path) {
-        List<Student> result = new ArrayList<>();
-        if (!Files.exists(path)) return result;
-        try (BufferedReader reader = Files.newBufferedReader(path)) {
-            reader.readLine(); // header
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] c = line.split(",", -1);
-                if (c.length < 5) continue;
-                Student student = new Student(
-                        c[0].trim(),
-                        c[1].trim(),
-                        "",
-                        Integer.parseInt(c[3].trim()),
-                        c[2].trim()
-                );
-                result.add(student);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load students", e);
-        }
-        return result;
+    private List<String[]> readCsv(String file, int minCols) {
+        Path path = Paths.get(file);
+        if (!Files.exists(path)) return new ArrayList<>();
+        try (Stream<String> lines = Files.lines(path)) {
+            return lines.skip(1)
+                    .map(l -> l.split(",", -1))
+                    .filter(c -> c.length >= minCols)
+                    .collect(Collectors.toList());
+        } catch (IOException e) { throw new RuntimeException("Failed to load data from " + file, e); }
     }
 
-    private List<CareerCenterStaff> readStaff(Path path) {
-        List<CareerCenterStaff> result = new ArrayList<>();
-        if (!Files.exists(path)) return result;
-        try (BufferedReader reader = Files.newBufferedReader(path)) {
-            reader.readLine(); // header
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] c = line.split(",", -1);
-                if (c.length < 5) continue;
-                CareerCenterStaff staff = new CareerCenterStaff(
-                        c[4].trim(),
-                        c[1].trim(),
-                        ""
-                );
-                result.add(staff);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load staff", e);
-        }
-        return result;
+    private CompanyRep buildRep(String[] c) {
+        CompanyRep rep = new CompanyRep(c[5].trim(), c[1].trim(), "");
+        rep.setAuthorised(true);
+        return rep;
     }
 
-    private List<CompanyRep> readCompanyReps(Path path) {
-        List<CompanyRep> result = new ArrayList<>();
-        if (!Files.exists(path)) return result;
-        try (BufferedReader reader = Files.newBufferedReader(path)) {
-            reader.readLine(); // header
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] c = line.split(",", -1);
-                if (c.length < 7) continue;
-                if (!"true".equalsIgnoreCase(c[6]) && !"approved".equalsIgnoreCase(c[6])) continue;
-                CompanyRep rep = new CompanyRep(c[5].trim(), c[1].trim(), "");
-                rep.setAuthorised(true);
-                result.add(rep);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load company representatives", e);
-        }
-        return result;
+    private boolean isApproved(String status) {
+        return "true".equalsIgnoreCase(status) || "approved".equalsIgnoreCase(status);
     }
 }

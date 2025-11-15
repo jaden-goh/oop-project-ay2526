@@ -4,29 +4,32 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Student extends User {
-    private int year;
+    private String year;
     private String major;
 
     private final List<Application> applications = new ArrayList<>();
 
-    public Student(String userId, String name, String password, int year, String major) {
+    public Student(String userId, String name, String password, String year, String major) {
         super(userId, name, password);
         this.year = year;
         this.major = major;
     }
+    
 
 
-
-    public int getYear() { return year; }
-    public void setYear(int year) { this.year = year; }
+    public String getYear() { return year; }
+    public void setYear(String year) { this.year = year; }
 
     public String getMajor() { return major; }
     public void setMajor(String major) { this.major = major; }
+
+    public List<Application> getApplications(){return applications;}
 
     // functions
 
@@ -43,8 +46,23 @@ public class Student extends User {
 
     }
 
-    public List<Application> viewApplications() {
-        return Collections.unmodifiableList(applications);
+    public void viewApplications() {
+        if (applications.isEmpty()) {
+            System.out.println("You have not submitted any applications.");
+        } else {
+            System.out.println("Your applications:");
+            for (int i = 0; i < applications.size(); i++) {
+                Application application = applications.get(i);
+                String title = application.getInternship() != null
+                        ? application.getInternship().getTitle()
+                        : "Unknown Internship";
+                System.out.printf("%d. %s - Status: %s (Applied on %s)%n",
+                        i + 1,
+                        title,
+                        application.getStatus(),
+                        application.getDateApplied());
+            }
+        }
     }
 
 
@@ -68,12 +86,48 @@ public class Student extends User {
 
         return true;
     }
-    public boolean reqWithdrawal(Application application) {
-        if (application == null) return false;
-        if (!applications.contains(application)) return false;
+    public boolean reqWithdrawal() {
+        if (applications.isEmpty()) {
+            System.out.println("You have no applications to withdraw.");
+            return false;
+        }
 
-        return application.requestWithdrawal();
+        System.out.println("Select an application to request withdrawal:");
+        for (int i = 0; i < applications.size(); i++) {
+            Application application = applications.get(i);
+            System.out.printf("%d. %s (%s)%n",
+                    i + 1,
+                    application.getInternship().getTitle(),
+                    application.getStatus());
+        }
+        System.out.println("Enter choice: ");
 
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.nextLine().trim();
+        int selection;
+        try {
+            selection = Integer.parseInt(input);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid selection.");
+            return false;
+        }
+
+        if (selection < 1 || selection > applications.size()) {
+            System.out.println("Invalid selection.");
+            return false;
+        }
+
+        Application selected = applications.get(selection - 1);
+        ApplicationStatus status = selected.getStatus();
+        if (status == ApplicationStatus.WITHDRAWN || status == ApplicationStatus.ACCEPTED) {
+            System.out.println("This application cannot be withdrawn.");
+            return false;
+        }
+
+        selected.setWithdrawn(true);
+        selected.updateStatus(ApplicationStatus.PENDING_WITHDRAWAL);
+        System.out.println("Withdrawal requested for " + selected.getInternship().getTitle() + ".");
+        return true;
     }
     public boolean canApply() {
         long activeCount = applications.stream()
@@ -92,5 +146,13 @@ public class Student extends User {
         if (application != null) applications.add(application);
     }
 
-}
+    public void displayDetails() {
+        System.out.println("Student ID: " + getId());
+        System.out.println("Name: " + getName());
+        System.out.println("Major: " + getMajor());
+        System.out.println("Year: " + getYear());
+        System.out.println("Applications submitted: " + applications.size());
+        System.out.println("Password: " + getPassword());
+    }
 
+}
