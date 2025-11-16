@@ -127,6 +127,7 @@ public class InternshipSystemCLI {
             String choice = scanner.nextLine();
             switch (choice){
                 case "1" -> staff.displayDetails();
+                case "2" -> staff.handleInternshipRequests(internshipManager.getInternships(), scanner);
                 case "3" -> staff.handleWithdrawalRequests(users, scanner);
                 case "4" -> handleRepAuthorization(staff);
                 case "5" -> internshipManager.run(staff, scanner);
