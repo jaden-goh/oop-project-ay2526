@@ -38,7 +38,7 @@ public abstract class User {
             System.out.println("Incorrect old password. Password change failed.");
         }
         else {
-            System.out.print("Enter new password");
+            System.out.println("Enter new password: ");
             this.password = scanner.nextLine();
             System.out.println("Password changed successfully.");
         }

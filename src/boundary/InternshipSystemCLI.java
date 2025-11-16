@@ -50,7 +50,7 @@ public class InternshipSystemCLI {
         System.out.println("(3) View your internship applications");
         System.out.println("(4) Request application withdrawal");
         System.out.println("(5) Change password");
-        System.out.println("(6) Exit");
+        System.out.println("(6) Logout");
         while (running){
             System.out.println("Enter choice: ");
             String choice = scanner.nextLine();
@@ -82,7 +82,7 @@ public class InternshipSystemCLI {
         System.out.println("(4) Change internship visibility");
         System.out.println("(5) View internships (with filters)");
         System.out.println("(6) Change password");
-        System.out.println("(7) Exit");
+        System.out.println("(7) Logout");
         while (running){
             System.out.println("Enter choice: ");
             String choice = scanner.nextLine();
@@ -121,7 +121,7 @@ public class InternshipSystemCLI {
         System.out.println("(5) View all internships (with filters)");
         System.out.println("(6) Generate reports");
         System.out.println("(7) Change password");
-        System.out.println("(8) Exit");
+        System.out.println("(8) Logout");
         while (running){
             System.out.println("Enter choice: ");
             String choice = scanner.nextLine();

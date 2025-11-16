@@ -53,5 +53,23 @@ public class Company {
             internship.setCompany(this); 
         }
     }
+
+    public double getApprovedApplicationRate() {
+        int total = 0;
+        int approved = 0;
+        for (Internship internship : internships) {
+            for (InternshipSlot slot : internship.getSlots()) {
+                Application app = slot.getApplication();
+                if (app != null) {
+                    total++;
+                    if (app.getStatus() == ApplicationStatus.SUCCESSFUL) {
+                        approved++;
+                    }
+                }
+            }
+        }
+        if (total == 0) return 0;
+        return approved * 1.0 / total;
+    }
 }
 
