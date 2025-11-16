@@ -52,24 +52,19 @@ public class UserAuthenticator {
     }
 
     public void handleCompanyRepLogin() {
-        System.out.print("Enter Company Rep email: ");
-        String email = scanner.nextLine().trim();
-        if (!email.endsWith(".com")) {
-            System.out.println("Invalid company email format.");
-            return;
-        }
-        String[] record = getCompanyRepRecord(email);
-        if (record == null) {
-            System.out.println("Company record not found. Please contact the career center for assistance.");
-            return;
-        }
-        System.out.print("Enter your Company ID");
+        System.out.print("Enter Company Rep ID: ");
         String id = scanner.nextLine().trim();
+
         User user = findUserById(id, CompanyRep.class);
         if (user == null) {
             System.out.println("Company Rep not found.");
             return;
         }
+        String[] record = getCompanyRepRecord(id);
+        if (record == null) {
+            System.out.println("Company record not found. Please contact the career center for assistance.");
+            return;
+        }        
         System.out.println(("Enter Password: "));
         String password = scanner.nextLine().trim();
         if (!user.verifyPassword(password)){
@@ -129,6 +124,24 @@ public class UserAuthenticator {
             System.out.print("Enter Email: ");
             String email = scanner.nextLine().trim();
 
+            System.out.println("Confirm your details:");
+            System.out.println("Student ID: " + studentID);
+            System.out.println("Name: " + name);
+            System.out.println("Major: " + major);
+            System.out.println("Year of Study: " + year);
+            System.out.println("Email: " + email);
+            System.out.print("Is the information correct? (Y/N): ");
+            String confirm = scanner.nextLine().trim();
+            if (confirm.equalsIgnoreCase("N")) {
+                System.out.println("Registration cancelled. Please start over.");
+                return;
+            }
+            if (confirm.equalsIgnoreCase("Y")) {
+                System.out.println("Proceeding with registration...");
+            } else {
+                System.out.println("Invalid input. Registration cancelled.");
+                return;
+            }
             File file = new File("data/sample_student_list.csv");
             boolean writeHeader = !file.exists() || file.length() == 0;
 
@@ -155,14 +168,14 @@ public class UserAuthenticator {
         if (choice.equals("2")){
             System.out.println("=== Company Representative Registration ===");
 
-            System.out.print("Enter Company Rep ID: ");
-            String companyrepid = scanner.nextLine().trim();
+            System.out.print("Enter Company Email: ");
+            String email = scanner.nextLine().trim();
+            String companyrepid = extractEmailParts(email)[0];
+            String companyname = extractEmailParts(email)[1];
 
             System.out.print("Enter Name: ");
             String name = scanner.nextLine().trim();
 
-            System.out.print("Enter Company Name: ");
-            String companyname = scanner.nextLine().trim();
 
             System.out.print("Enter Department: ");
             String department = scanner.nextLine().trim();
@@ -170,8 +183,25 @@ public class UserAuthenticator {
             System.out.print("Enter Position: ");
             String position = scanner.nextLine();
 
-            System.out.print("Enter Email: ");
-            String email = scanner.nextLine().trim();
+            System.out.println("Confirm your details:");
+            System.out.println("Company Rep ID: " + companyrepid);
+            System.out.println("Name: " + name);
+            System.out.println("Company Name: " + companyname);
+            System.out.println("Department: " + department);
+            System.out.println("Position: " + position);
+            System.out.println("Email: " + email);
+            System.out.print("Is the information correct? (Y/N): ");
+            String confirm = scanner.nextLine().trim();
+            if (confirm.equalsIgnoreCase("N")) {
+                System.out.println("Registration cancelled. Please start over.");
+                return;
+            }
+            if (confirm.equalsIgnoreCase("Y")) {
+                System.out.println("Proceeding with registration...");
+            } else {
+                System.out.println("Invalid input. Registration cancelled.");
+                return;
+            }
 
             String approved = "false";
 
@@ -190,7 +220,7 @@ public class UserAuthenticator {
                 writer.newLine();
                 writer.flush();
 
-                System.out.println("Registration completed! Welcome, " + name);
+                System.out.println("Registration completed! Your Company Rep ID is: " + companyrepid + ". Please wait for approval from Career Center Staff before logging in.");
                 CompanyRep newRep = new CompanyRep(email, name, "");
                 newRep.setId(companyrepid);
                 newRep.setEmail(email);
@@ -224,7 +254,25 @@ public class UserAuthenticator {
 
             System.out.print("Enter Email: ");
             String email = scanner.nextLine().trim();
-
+            
+            System.out.println("Confirm your details:");
+            System.out.println("Staff ID: " + staffid);
+            System.out.println("Name: " + name);
+            System.out.println("Role: " + role);
+            System.out.println("Department: " + department);
+            System.out.println("Email: " + email);
+            System.out.print("Is the information correct? (Y/N): ");
+            String confirm = scanner.nextLine().trim();
+            if (confirm.equalsIgnoreCase("N")) {
+                System.out.println("Registration cancelled. Please start over.");
+                return;
+            }
+            if (confirm.equalsIgnoreCase("Y")) {
+                System.out.println("Proceeding with registration...");
+            } else {
+                System.out.println("Invalid input. Registration cancelled.");
+                return;
+            }
             File file = new File("data/sample_staff_list.csv");
             boolean writeHeader = !file.exists() || file.length() == 0;
 
@@ -258,7 +306,7 @@ public class UserAuthenticator {
         return null;
     }
 
-    private String[] getCompanyRepRecord(String email) {
+    private String[] getCompanyRepRecord(String id) {
         Path path = Paths.get(COMPANY_REP_CSV);
         if (!Files.exists(path)) {
             return null;
@@ -269,7 +317,7 @@ public class UserAuthenticator {
                 if (line.isBlank()) continue;
                 String[] columns = line.split(",", -1);
                 if (columns.length < 7) continue;
-                if (columns[5].equalsIgnoreCase(email)) {
+                if (columns[0].equalsIgnoreCase(id)) {
                     return columns;
                 }
             }
@@ -282,4 +330,21 @@ public class UserAuthenticator {
     private boolean isApprovedStatus(String status) {
         return "true".equalsIgnoreCase(status) || "approved".equalsIgnoreCase(status);
     }
+
+    public static String[] extractEmailParts(String email) {
+        if (email == null) return null;
+
+        int atIndex = email.indexOf("@");
+        int dotIndex = email.lastIndexOf(".");
+
+        if (atIndex == -1 || dotIndex == -1 || dotIndex < atIndex) {
+            return null; // invalid email
+        }
+
+        String user = email.substring(0, atIndex);
+        String company = email.substring(atIndex + 1, dotIndex);
+
+        return new String[] { user, company };
+}
+
 }

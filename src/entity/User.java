@@ -6,6 +6,7 @@ public abstract class User {
     private String id;
     private String name;
     private String password;
+    private String email;
 
     public User(String id, String name, String password) {
         this.id = id;
@@ -16,6 +17,8 @@ public abstract class User {
     public String getId() { return id; }
     public String getName() { return name; }
     public String getPassword(){return password;}
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
     public void setName(String name) {
         // if (name == null || name.isBlank()) throw new IllegalArgumentException("name required");
         // to be added later, returning any exceptions good for edge cases
@@ -40,5 +43,6 @@ public abstract class User {
             System.out.println("Password changed successfully.");
         }
     }
+
 }
 
