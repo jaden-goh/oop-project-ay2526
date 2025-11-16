@@ -179,9 +179,7 @@ public class InternshipManager {
 
     public List<Internship> getVisibleInternships(Student student) {
         return filterBy(i ->
-            i.isVisibility() &&
-            i.isApproved() &&
-            i.getStatus() == InternshipStatus.APPROVED &&
+            i.isOpen() &&
                     i.getPreferredMajor() != null &&
                     i.getPreferredMajor().equalsIgnoreCase(student.getMajor()) &&
                     isEligibleByYearLevel(student, i)

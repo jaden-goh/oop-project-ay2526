@@ -119,7 +119,7 @@ public class Student extends User {
 
         Application selected = applications.get(selection - 1);
         ApplicationStatus status = selected.getStatus();
-        if (status == ApplicationStatus.WITHDRAWN || status == ApplicationStatus.ACCEPTED) {
+        if (status == ApplicationStatus.WITHDRAWN) {
             System.out.println("This application cannot be withdrawn.");
             return false;
         }

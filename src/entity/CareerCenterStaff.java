@@ -112,7 +112,11 @@ public class CareerCenterStaff extends User {
 
     public void handleWithdrawalRequests(java.util.List<User> users, java.util.Scanner scanner) {
         java.util.ArrayList<Application> pending = new java.util.ArrayList<>();
-        for (User user : users) if (user instanceof Student s) for (Application app : s.getApplications()) if (app.getStatus() == ApplicationStatus.PENDING_WITHDRAWAL) pending.add(app);
+        for (User user : users) 
+            if (user instanceof Student s) 
+                for (Application app : s.getApplications()) 
+                    if (app.getStatus() == ApplicationStatus.PENDING_WITHDRAWAL) 
+                        pending.add(app);
         if (pending.isEmpty()) {
             System.out.println("No withdrawal requests.");
             return;
