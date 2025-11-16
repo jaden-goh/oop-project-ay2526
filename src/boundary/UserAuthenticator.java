@@ -160,6 +160,9 @@ public class UserAuthenticator {
                 writer.flush();
 
                 System.out.println("Registration completed! Welcome, " + name);
+                Student newStudent = new Student(studentID, name, "", year, major);
+                newStudent.setEmail(email);
+                cli.getUsers().add(newStudent);
 
             } catch (IOException e) {
                 System.out.println("Error writing student record: " + e.getMessage());
@@ -301,6 +304,8 @@ public class UserAuthenticator {
                 writer.flush();
 
                 System.out.println("Registration completed! Welcome, " + name);
+                CareerCenterStaff newStaff = new CareerCenterStaff(staffid, name, "", role, department, email);
+                cli.getUsers().add(newStaff);
 
             } catch (IOException e) {
                 System.out.println("Error writing student record: " + e.getMessage());
