@@ -54,7 +54,18 @@ public class UserAuthenticator {
     public void handleCompanyRepLogin() {
         System.out.print("Enter Company Rep email: ");
         String email = scanner.nextLine().trim();
-        User user = findUserById(email, CompanyRep.class);
+        if (!email.endsWith(".com")) {
+            System.out.println("Invalid company email format.");
+            return;
+        }
+        String[] record = getCompanyRepRecord(email);
+        if (record == null) {
+            System.out.println("Company record not found. Please contact the career center for assistance.");
+            return;
+        }
+        System.out.print("Enter your Company ID");
+        String id = scanner.nextLine().trim();
+        User user = findUserById(id, CompanyRep.class);
         if (user == null) {
             System.out.println("Company Rep not found.");
             return;
@@ -63,15 +74,6 @@ public class UserAuthenticator {
         String password = scanner.nextLine().trim();
         if (!user.verifyPassword(password)){
             System.out.println("Incorrect Password");
-            return;
-        }
-        if (!email.endsWith(".com")) {
-            System.out.println("Invalid company email format.");
-            return;
-        }
-        String[] record = getCompanyRepRecord(email);
-        if (record == null) {
-            System.out.println("Company record not found. Please contact the career center for assistance.");
             return;
         }
         if (!isApprovedStatus(record[6])) {
@@ -190,6 +192,7 @@ public class UserAuthenticator {
 
                 System.out.println("Registration completed! Welcome, " + name);
                 CompanyRep newRep = new CompanyRep(email, name, "");
+                newRep.setId(companyrepid);
                 newRep.setEmail(email);
                 newRep.setDepartment(department);
                 newRep.setPosition(position);
