@@ -45,7 +45,7 @@ public class CompanyRep extends User {
     // create an internship posting by this rep
     // status: pending, visibility: false (students are unable to see this until it is approved)
     public Internship createInternship() {
-        if (company == null) {
+        if (company == null || internships.size() >= 5) {
             System.out.println("You must be linked to a company before creating an internship.");
             return null;
         }
@@ -62,8 +62,8 @@ public class CompanyRep extends User {
             System.out.println("Invalid dates entered. Internship creation aborted.");
             return null;
         }
-        Integer slots = readInteger(scanner, "Number of slots");
-        if (slots == null || slots <= 0) {
+        Integer slots = readInteger(scanner, "Number of slots (max 10)");
+        if (slots == null || slots <= 0 || slots > 10) {
             System.out.println("Number of slots must be a positive integer.");
             return null;
         }

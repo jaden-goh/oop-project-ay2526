@@ -93,6 +93,22 @@ public class InternshipManager {
                     System.out.println("   Open: " + internship.getOpenDate() + " | Close: " + internship.getCloseDate());
                 }
             }
+            System.out.print("Enter internship number to apply (or press Enter to skip): ");
+            String selection = scanner.nextLine().trim();
+            if (!selection.isEmpty()) {
+                try {
+                    int idx = Integer.parseInt(selection);
+                    if (idx < 1 || idx > opportunities.size()) {
+                        System.out.println("Invalid selection.");
+                    } else if (student.applyInternship(opportunities.get(idx - 1))) {
+                        System.out.println("Application submitted.");
+                    } else {
+                        System.out.println("Unable to submit application.");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid selection.");
+                }
+            }
             System.out.printf("Current closing date filter: %s to %s%n",
                     formatDate(settings.getClosingStart()),
                     formatDate(settings.getClosingEnd()));

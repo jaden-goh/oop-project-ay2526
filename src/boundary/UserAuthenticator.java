@@ -81,12 +81,8 @@ public class UserAuthenticator {
 
     public void handleCareerStaffLogin() {
         System.out.print("Enter Career Staff ID: ");
-        String email = scanner.nextLine().trim();
-        if (!email.endsWith("@ntu.edu.sg")) {
-            System.out.println("Invalid email format for career staff.");
-            return;
-        }
-        User user = findUserById(email, CareerCenterStaff.class);
+        String id = scanner.nextLine().trim();
+        User user = findUserById(id, CareerCenterStaff.class);
         if (user == null) {
             System.out.println("Staff not found.");
             return;
@@ -98,8 +94,8 @@ public class UserAuthenticator {
             return;
         }
         cli.setCurrentUser(user);
-        cli.displayStaffMenu((CareerCenterStaff)user);
         System.out.println("Welcome, " + user.getName());
+        cli.displayStaffMenu((CareerCenterStaff)user);
         cli.setCurrentUser(null);
     }
 
@@ -142,6 +138,11 @@ public class UserAuthenticator {
                 System.out.println("Invalid input. Registration cancelled.");
                 return;
             }
+            if (recordExists("data/sample_student_list.csv", 0, studentID)) {
+                System.out.println("A student with this ID already exists. Please log in instead.");
+                return;
+            }
+
             File file = new File("data/sample_student_list.csv");
             boolean writeHeader = !file.exists() || file.length() == 0;
 
@@ -205,6 +206,11 @@ public class UserAuthenticator {
 
             String approved = "false";
 
+            if (recordExists("data/sample_company_representative_list.csv", 0, companyrepid)) {
+                System.out.println("A company representative with this ID already exists. Please log in instead.");
+                return;
+            }
+
             File file = new File("data/sample_company_representative_list.csv");
             boolean writeHeader = !file.exists() || file.length() == 0;
 
@@ -254,7 +260,7 @@ public class UserAuthenticator {
 
             System.out.print("Enter Email: ");
             String email = scanner.nextLine().trim();
-            
+
             System.out.println("Confirm your details:");
             System.out.println("Staff ID: " + staffid);
             System.out.println("Name: " + name);
@@ -273,6 +279,11 @@ public class UserAuthenticator {
                 System.out.println("Invalid input. Registration cancelled.");
                 return;
             }
+            if (recordExists("data/sample_staff_list.csv", 0, staffid)) {
+                System.out.println("A staff member with this ID already exists. Please log in instead.");
+                return;
+            }
+
             File file = new File("data/sample_staff_list.csv");
             boolean writeHeader = !file.exists() || file.length() == 0;
 
@@ -329,6 +340,28 @@ public class UserAuthenticator {
 
     private boolean isApprovedStatus(String status) {
         return "true".equalsIgnoreCase(status) || "approved".equalsIgnoreCase(status);
+    }
+
+    private boolean recordExists(String filePath, int columnIndex, String value) {
+        Path path = Paths.get(filePath);
+        if (!Files.exists(path)) {
+            return false;
+        }
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            reader.readLine(); // header
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) continue;
+                String[] columns = line.split(",", -1);
+                if (columns.length <= columnIndex) continue;
+                if (columns[columnIndex].equalsIgnoreCase(value)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Failed to verify existing records: " + e.getMessage());
+        }
+        return false;
     }
 
     public static String[] extractEmailParts(String email) {

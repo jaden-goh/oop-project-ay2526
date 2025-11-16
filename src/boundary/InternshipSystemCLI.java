@@ -3,6 +3,8 @@ import control.FilterSettings;
 import control.InternshipManager;
 import control.UserDataLoader;
 import entity.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -125,6 +127,7 @@ public class InternshipSystemCLI {
             String choice = scanner.nextLine();
             switch (choice){
                 case "1" -> staff.displayDetails();
+                case "3" -> staff.handleWithdrawalRequests(users, scanner);
                 case "4" -> handleRepAuthorization(staff);
                 case "5" -> internshipManager.run(staff, scanner);
                 case "6" -> handleGenerateReport(staff);
@@ -183,7 +186,17 @@ public class InternshipSystemCLI {
         System.out.print("Approve? (y/n): ");
         boolean approve = scanner.nextLine().trim().equalsIgnoreCase("y");
         staff.authoriseRep(pending.get(selection - 1), approve);
-    }
+        if (approve) try { Path p = Path.of("data/sample_company_representative_list.csv"); 
+        if (Files.exists(p)) { List<String> lines = Files.readAllLines(p); 
+        String repId = pending.get(selection - 1).getId(); 
+        for (int i = 1; i < lines.size(); i++) { 
+            String[] c = lines.get(i).split(",", -1); 
+            if (c.length >= 7 && c[0].equalsIgnoreCase(repId)) { 
+                c[6] = "true"; lines.set(i, String.join(",", c)); 
+                Files.write(p, lines); break; } } } } catch (Exception e) { 
+                System.out.println("Failed to persist approval: " + e.getMessage()); 
+            }
+        }
 
     private void handleGenerateReport(CareerCenterStaff staff) {
         FilterSettings filters = internshipManager.getOrCreateFilterSettings(staff.getId());
