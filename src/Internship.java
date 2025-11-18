@@ -46,7 +46,19 @@ public class Internship {
     }
 
     public void setPreferredMajor(String preferredMajor) {
-        this.preferredMajor = preferredMajor;
+        this.preferredMajor = preferredMajor == null || preferredMajor.isBlank()
+                ? null
+                : preferredMajor.trim();
+    }
+
+    public boolean acceptsMajor(String major) {
+        if (preferredMajor == null || preferredMajor.isBlank()) {
+            return true;
+        }
+        if (major == null || major.isBlank()) {
+            return false;
+        }
+        return preferredMajor.equalsIgnoreCase(major.trim());
     }
 
     public LocalDate getOpenDate() {

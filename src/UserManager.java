@@ -192,6 +192,16 @@ public class UserManager {
         return Collections.unmodifiableList(matches.subList(fromIndex, toIndex));
     }
 
+    public List<CareerCenterStaff> getCareerCenterStaffMembers() {
+        List<CareerCenterStaff> staffMembers = new ArrayList<>();
+        for (User user : users) {
+            if (user instanceof CareerCenterStaff staff) {
+                staffMembers.add(staff);
+            }
+        }
+        return Collections.unmodifiableList(staffMembers);
+    }
+
     private void loadStudents(File file) {
         if (!isReadable(file)) {
             System.err.println("Student file missing: " + (file == null ? "null" : file.getPath()));

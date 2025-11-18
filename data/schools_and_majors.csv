@@ -1,0 +1,54 @@
+School,Major
+CCDS,Computer Science
+CCDS,Computer Engineering
+CCDS,Data Science and Artificial Intelligence
+
+EEE,Electrical and Electronic Engineering
+EEE,Information Engineering and Media
+
+MAE,Mechanical Engineering
+MAE,Aerospace Engineering
+
+CEE,Civil Engineering
+CEE,Environmental Engineering
+
+NBS,Accountancy
+NBS,Business
+NBS,Business (Business Analytics)
+NBS,Business (Marketing)
+NBS,Business (Human Resource Consulting)
+NBS,Business (International Business)
+
+SOH,History
+SOH,Philosophy
+SOH,Chinese
+SOH,English
+SOH,Linguistics and Multilingual Studies
+
+SSS,Economics
+SSS,Psychology
+SSS,Sociology
+SSS,Public Policy and Global Affairs
+
+ADM,Art History
+ADM,Design Art
+ADM,Media Art
+
+SPMS,Mathematical Sciences
+SPMS,Mathematics and Economics
+SPMS,Physics
+SPMS,Applied Physics
+SPMS,Chemistry and Biological Chemistry
+
+ASE,Earth Sciences
+
+WKWSCI,Communication Studies
+
+NIE,Education (Primary)
+NIE,Education (Secondary)
+
+LKCMedicine,Medicine
+
+SBS,Biological Sciences
+SBS,Biomedical Sciences
+SBS,Medicine & Biological Sciences

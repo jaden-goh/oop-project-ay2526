@@ -15,8 +15,7 @@ public class ReportGenerator {
     public void generateByMajor(List<Internship> internships, String major) {
         List<Internship> matches = new ArrayList<>();
         for (Internship internship : internships) {
-            if (internship.getPreferredMajor() != null
-                    && internship.getPreferredMajor().equalsIgnoreCase(major)) {
+            if (internship.acceptsMajor(major)) {
                 matches.add(internship);
             }
         }
@@ -60,12 +59,20 @@ public class ReportGenerator {
                     + " (" + internship.getCompanyName() + ")"
                     + " | Status: " + internship.getStatus()
                     + " | Level: " + internship.getLevel()
-                    + " | Major: " + (internship.getPreferredMajor() == null ? "Any" : internship.getPreferredMajor())
+                    + " | Major: " + formatPreferredMajor(internship)
                     + " | Visible: " + (internship.isVisible() ? "Yes" : "No")
                     + " | Slots: " + filledSlots + "/" + totalSlots);
         }
         long visibleCount = internships.stream().filter(Internship::isVisible).count();
         System.out.println("Total internships: " + internships.size()
                 + " (visible: " + visibleCount + ")");
+    }
+
+    private String formatPreferredMajor(Internship internship) {
+        if (internship == null) {
+            return "Any";
+        }
+        String major = internship.getPreferredMajor();
+        return major == null || major.isBlank() ? "Any" : major;
     }
 }

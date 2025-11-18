@@ -55,7 +55,8 @@ public class FilterCriteria {
         if (status != null && internship.getStatus() != status) {
             return false;
         }
-        if (preferredMajor != null && !preferredMajor.equalsIgnoreCase(internship.getPreferredMajor())) {
+        if (preferredMajor != null && !preferredMajor.isBlank()
+                && !internship.acceptsMajor(preferredMajor)) {
             return false;
         }
         if (level != null && internship.getLevel() != level) {

@@ -7,21 +7,22 @@ import java.util.List;
 public class ApplicationManager {
     private static final int MAX_ACTIVE_APPLICATIONS = 3;
     private final List<String> submissionNotifications = new ArrayList<>();
-    private String lastFailureReason = "";
+    private String Reason = "";
+    private NotificationManager notificationManager;
 
     public Application submitApplication(Student student, Internship internship) {
         if (student == null || internship == null) {
             throw new IllegalArgumentException("Student and internship are required.");
         }
         if (!enforceRules(student, internship)) {
-            throw new IllegalStateException(lastFailureReason);
+            throw new IllegalStateException(Reason);
         }
         Application application = new Application(student, internship);
         internship.addApplication(application);
         student.getApplications().add(application);
         submissionNotifications.add(LocalDateTime.now() + " :: "
                 + student.getName() + " applied for " + internship.getTitle());
-        lastFailureReason = "";
+        Reason = "";
         return application;
     }
 
@@ -36,6 +37,9 @@ public class ApplicationManager {
         application.setStatus(status);
         if (status == ApplicationStatus.SUCCESSFUL) {
             markOtherApplications(application);
+            if (!confirmOffer) {
+                notifyStudentOfSuccessfulApplication(application);
+            }
             if (confirmOffer) {
                 assignSlot(application);
             }
@@ -46,38 +50,36 @@ public class ApplicationManager {
 
     public boolean enforceRules(Student student, Internship internship) {
         if (student == null || internship == null) {
-            lastFailureReason = "Student and internship are required.";
+            Reason = "Student and internship are required.";
             return false;
         }
         if (internship.getStatus() != InternshipStatus.APPROVED) {
-            lastFailureReason = "Internship has not been approved yet.";
+            Reason = "Internship has not been approved yet.";
             return false;
         }
         if (!internship.isVisible()) {
-            lastFailureReason = "Internship is currently hidden.";
+            Reason = "Internship is currently hidden.";
             return false;
         }
-        String preferredMajor = internship.getPreferredMajor();
         String studentMajor = student.getMajor();
-        if (preferredMajor != null && !preferredMajor.isBlank()
-                && studentMajor != null && !preferredMajor.equalsIgnoreCase(studentMajor)) {
-            lastFailureReason = "Major does not match the preferred major for this internship.";
+        if (!internship.acceptsMajor(studentMajor)) {
+            Reason = "Major does not match the preferred major for this internship.";
             return false;
         }
         InternshipLevel level = internship.getLevel();
         if (student.getYearOfStudy() <= 2 && level != null && level != InternshipLevel.BASIC) {
-            lastFailureReason = "Lower-year students may only apply for BASIC level internships.";
+            Reason = "Lower-year students may only apply for BASIC level internships.";
             return false;
         }
         LocalDate today = LocalDate.now();
         LocalDate openDate = internship.getOpenDate();
         if (openDate != null && today.isBefore(openDate)) {
-            lastFailureReason = "Internship is not open for applications yet.";
+            Reason = "Internship is not open for applications yet.";
             return false;
         }
         LocalDate closeDate = internship.getCloseDate();
         if (closeDate != null && today.isAfter(closeDate)) {
-            lastFailureReason = "Internship is already closed.";
+            Reason = "Internship is already closed.";
             return false;
         }
         long activeCount = student.getApplications().stream()
@@ -85,30 +87,34 @@ public class ApplicationManager {
                         || app.getStatus() == ApplicationStatus.SUCCESSFUL)
                 .count();
         if (activeCount >= MAX_ACTIVE_APPLICATIONS) {
-            lastFailureReason = "Maximum of " + MAX_ACTIVE_APPLICATIONS + " active applications reached.";
+            Reason = "Maximum of " + MAX_ACTIVE_APPLICATIONS + " active applications reached.";
             return false;
         }
         for (Application application : student.getApplications()) {
             if (application.getInternship() == internship
                     && application.getStatus() != ApplicationStatus.UNSUCCESSFUL) {
-                lastFailureReason = "You have already applied for this internship.";
+                Reason = "You have already applied for this internship.";
                 return false;
             }
         }
         if (student.hasAcceptedPlacement()) {
-            lastFailureReason = "You have already accepted a placement.";
+            Reason = "You have already accepted a placement.";
             return false;
         }
         if (internship.isFull()) {
-            lastFailureReason = "Internship slots have been filled.";
+            Reason = "Internship slots have been filled.";
             return false;
         }
-        lastFailureReason = "";
+        Reason = "";
         return true;
     }
 
     public String getLastFailureReason() {
-        return lastFailureReason;
+        return Reason;
+    }
+
+    public void setNotificationManager(NotificationManager notificationManager) {
+        this.notificationManager = notificationManager;
     }
 
     private void assignSlot(Application application) {
@@ -142,6 +148,13 @@ public class ApplicationManager {
                 application.setStatus(ApplicationStatus.UNSUCCESSFUL);
             }
         }
+    }
+
+    private void notifyStudentOfSuccessfulApplication(Application application) {
+        if (notificationManager == null) {
+            return;
+        }
+        notificationManager.notifyStudentOfferAwaitingAcceptance(application);
     }
 
 }

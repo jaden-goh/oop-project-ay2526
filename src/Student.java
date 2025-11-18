@@ -55,9 +55,9 @@ public class Student extends User {
         }
         acceptedPlacement = application;
         for (Application other : applications) {
-            if (other != application && other.getStatus() == ApplicationStatus.PENDING) {
-                manager.updateStatus(other, ApplicationStatus.UNSUCCESSFUL);
-            }
+            if (other != application && (other.getStatus() == ApplicationStatus.PENDING || other.getStatus() == ApplicationStatus.SUCCESSFUL)) {
+                    manager.updateStatus(other, ApplicationStatus.UNSUCCESSFUL);
+                }
         }
         manager.updateStatus(application, ApplicationStatus.SUCCESSFUL, true);
     }

@@ -1,0 +1,186 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class User {
+  - userID : String
+  - name : String
+  - password : String
+  - filterPreferences : FilterCriteria
+  + login(password : String) : boolean
+  + logout() : void
+  + changePassword(newPass : String) : void
+  + getUserID() : String
+  + getName() : String
+}
+
+class Student {
+  - yearOfStudy : int
+  - major : String
+  - applications : List<Application>
+  + apply(internship : Internship) : boolean
+  + withdraw(application : Application) : void
+  + acceptPlacement(application : Application) : void
+  + getApplications() : List<Application>
+}
+
+class CompanyRep {
+  - companyName : String
+  - department : String
+  - position : String
+  - internships : List<Internship>
+  - approved : boolean
+  + createInternship(title : String, description : String) : Internship
+  + viewApplications(internship : Internship) : List<Application>
+  + toggleVisibility(internship : Internship, on : boolean) : void
+  + isApproved() : boolean
+}
+
+class CareerCenterStaff {
+  - staffDepartment : String
+  + approveInternship(internship : Internship) : void
+  + rejectInternship(internship : Internship) : void
+  + approveRepAccount(request : AccountRequest) : void
+  + processWithdrawal(request : WithdrawalRequest, approve : boolean) : void
+}
+
+class FilterCriteria {
+  - status : String
+  - preferredMajor : String
+  - level : String
+  - closingDate : Date
+  + matches(internship : Internship) : boolean
+}
+
+class Internship {
+  - title : String
+  - description : String
+  - level : String
+  - preferredMajor : String
+  - openDate : Date
+  - closeDate : Date
+  - visibility : boolean
+  - status : String
+  - companyName : String
+  - repInCharge : CompanyRep
+  - slots : List<InternshipSlot>
+  - applications : List<Application>
+  + addSlot(slot : InternshipSlot) : void
+  + addApplication(application : Application) : void
+  + toggleVisibility(on : boolean) : void
+}
+
+class InternshipSlot {
+  - slotNumber : int
+  - assignedStudent : Student
+  + assignStudent(student : Student) : void
+}
+
+class Application {
+  - student : Student
+  - internship : Internship
+  - status : String
+  - timestamp : Date
+  - withdrawalRequested : boolean
+  + markSuccessful() : void
+  + markUnsuccessful() : void
+  + requestWithdrawal(reason : String) : WithdrawalRequest
+}
+
+class WithdrawalRequest {
+  - application : Application
+  - student : Student
+  - reason : String
+  - status : String
+  + approve() : void
+  + reject() : void
+}
+
+class AccountRequest {
+  - rep : CompanyRep
+  - status : String
+  - approver : CareerCenterStaff
+  + setApprover(staff : CareerCenterStaff) : void
+  + setStatus(status : String) : void
+}
+
+class UserManager {
+  - users : List<User>
+  - pendingAccounts : List<AccountRequest>
+  - lastLoginMessage : String
+  + loadAllUsers(studentFile : File, staffFile : File, companyFile : File) : void
+  + login(id : String, pass : String) : User
+  + registerStudent(...) : boolean
+  + registerCompanyRep(...) : boolean
+  + registerCareerCenterStaff(...) : boolean
+  + approveRepresentative(repId : String, approver : CareerCenterStaff) : boolean
+  + getPendingAccounts() : List<AccountRequest>
+}
+
+class InternshipManager {
+  - internships : List<Internship>
+  + submitInternship(internship : Internship) : void
+  + approveInternship(internship : Internship) : void
+  + rejectInternship(internship : Internship) : void
+  + filter(criteria : FilterCriteria) : List<Internship>
+} 
+
+class ApplicationManager {
+  + submitApplication(student : Student, internship : Internship) : Application
+  + updateStatus(application : Application, status : String) : void
+  + enforceRules(student : Student, internship : Internship) : boolean
+}
+
+class WithdrawalManager {
+  + submitRequest(application : Application, reason : String) : WithdrawalRequest
+  + processRequest(request : WithdrawalRequest, staff : CareerCenterStaff) : void
+}
+
+class ReportGenerator {
+  + generateByStatus(internships : List<Internship>, status : String) : void
+  + generateByMajor(internships : List<Internship>, major : String) : void
+  + generateByLevel(internships : List<Internship>, level : String) : void
+  + generateCompanySummary(internships : List<Internship>, company : String) : void
+}
+
+class App {
+  - userManager : UserManager
+  - internshipManager : InternshipManager
+  - applicationManager : ApplicationManager
+  - withdrawalManager : WithdrawalManager
+  - reportGenerator : ReportGenerator
+  - scanner : Scanner
+  + start() : void
+  + promptLogin() : User
+  + handleRegistration() : void
+  + showStudentMenu(student : Student) : void
+  + showRepMenu(rep : CompanyRep) : void
+  + showStaffMenu(staff : CareerCenterStaff) : void
+}
+
+User <|-- Student
+User <|-- CompanyRep
+User <|-- CareerCenterStaff
+
+Student "1" o-- "*" Application : owns >
+Application --> Student : applicant
+Application --> Internship : appliedTo
+Internship "1" o-- "*" Application : receives >
+Internship "1" o-- "*" InternshipSlot : has >
+InternshipSlot --> Student : assigned >
+WithdrawalRequest --> Application : refers >
+WithdrawalRequest --> Student : requester >
+CompanyRep "1" o-- "*" Internship : manages >
+AccountRequest --> CompanyRep : rep >
+AccountRequest --> CareerCenterStaff : approver >
+UserManager --> User : manages >
+UserManager --> AccountRequest : tracks >
+App --> UserManager
+App --> InternshipManager
+App --> ApplicationManager
+App --> WithdrawalManager
+App --> ReportGenerator
+ApplicationManager --> Application
+WithdrawalManager --> WithdrawalRequest
+ReportGenerator --> Internship
+
+@enduml
