@@ -12,10 +12,6 @@ import entity.CompanyRep;
 import entity.Notification;
 import entity.Student;
 import entity.User;
-import menu.CompanyRepMenu;
-import menu.StaffMenu;
-import menu.StudentMenu;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Console;
@@ -27,6 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+import menu.CompanyRepMenu;
+import menu.StaffMenu;
+import menu.StudentMenu;
 
 public class App {
     private static final Pattern STUDENT_ID_PATTERN = Pattern.compile("^U\\d{7}[A-Z]$");
@@ -156,6 +155,11 @@ public class App {
             System.out.println("Reset cancelled.");
             return;
         }
+        String confirm = console.readLine("Confirm new temporary password: ");
+        if (!newPass.equals(confirm)) {
+            System.out.println("Passwords do not match. Reset cancelled.");
+            return;
+        }
         if (!userManager.resetPassword(id, newPass)) {
             System.out.println("Unable to reset password. Ensure the account exists and password meets requirements.");
         } else {
@@ -214,11 +218,11 @@ public class App {
             System.out.println("Registration cancelled.");
             return;
         }
-        String email = console.readLine("Email (must end with @ntu.edu.sg): ");
+        String email = console.readLine("Email (must end with @e.ntu.edu.sg): ");
         String normalizedEmail = email.toLowerCase();
         if (email.isEmpty()
                 || !EMAIL_PATTERN.matcher(email).matches()
-                || !normalizedEmail.endsWith("@ntu.edu.sg")) {
+                || !normalizedEmail.endsWith("@e.ntu.edu.sg")) {
             System.out.println("A valid NTU email is required.");
             return;
         }
@@ -234,7 +238,7 @@ public class App {
         }
         boolean registered = userManager.registerStudent(id, name, password, year, major);
         if (registered) {
-            persistStudentRecord(id, name, major, year);
+            persistStudentRecord(id, name, major, year, email);
             System.out.println("Student registered successfully.");
         } else {
             System.out.println("Registration failed. Ensure ID is unique and password meets requirements.");
@@ -309,8 +313,8 @@ public class App {
         }
     }
 
-    private void persistStudentRecord(String id, String name, String major, int year) {
-        String line = String.join(",", id, name, major, String.valueOf(year), "");
+    private void persistStudentRecord(String id, String name, String major, int year, String email) {
+        String line = String.join(",", id, name, major, String.valueOf(year), email);
         appendCsvLine(studentDataPath, STUDENT_HEADER, line);
     }
 

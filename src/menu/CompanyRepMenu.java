@@ -10,6 +10,7 @@ import entity.Application;
 import entity.ApplicationStatus;
 import entity.CompanyRep;
 import entity.Internship;
+import entity.InternshipLevel;
 import entity.User;
 
 import java.time.LocalDate;
