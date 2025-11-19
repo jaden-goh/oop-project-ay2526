@@ -14,7 +14,6 @@ import entity.Student;
 import entity.User;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.Console;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -290,13 +289,21 @@ public class App {
             return;
         }
         String department = console.readLine("Department: ");
+        String email = console.readLine("Email (must end with @ntu.edu.sg): ");
+        String normalizedEmail = email.toLowerCase();
+        if (email.isEmpty()
+                || !EMAIL_PATTERN.matcher(email).matches()
+                || !normalizedEmail.endsWith("@ntu.edu.sg")) {
+            System.out.println("A valid NTU email is required.");
+            return;
+        }
         if (!console.promptYesNo("Confirm staff registration? (y/n): ", true)) {
             System.out.println("Registration cancelled.");
             return;
         }
         boolean registered = userManager.registerCareerCenterStaff(id, name, password, department);
         if (registered) {
-            persistStaffRecord(id, name, department);
+            persistStaffRecord(id, name, department, email);
             System.out.println("Career Center Staff registered successfully.");
         } else {
             System.out.println("Registration failed. Ensure the ID is unique and password meets requirements.");
@@ -313,8 +320,8 @@ public class App {
         appendCsvLine(companyDataPath, COMPANY_HEADER, line);
     }
 
-    private void persistStaffRecord(String id, String name, String department) {
-        String line = String.join(",", id, name, "Career Center Staff", department, "");
+    private void persistStaffRecord(String id, String name, String department, String email) {
+        String line = String.join(",", id, name, "Career Center Staff", department, email);
         appendCsvLine(staffDataPath, STAFF_HEADER, line);
     }
 

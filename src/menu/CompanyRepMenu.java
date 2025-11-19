@@ -11,6 +11,7 @@ import entity.ApplicationStatus;
 import entity.CompanyRep;
 import entity.Internship;
 import entity.InternshipLevel;
+import entity.InternshipStatus;
 import entity.User;
 
 import java.time.LocalDate;
@@ -152,6 +153,10 @@ public class CompanyRepMenu {
         List<Internship> mine = internshipManager.getInternshipsForRep(rep);
         Internship selection = console.selectInternshipFromList(mine);
         if (selection == null) {
+            return;
+        }
+        if (selection.getStatus() == InternshipStatus.PENDING) {
+            System.out.println("Visibility cannot be changed while the internship is pending approval.");
             return;
         }
         boolean turnOn = console.promptYesNo("Turn visibility ON? (y/n): ", selection.isVisible());

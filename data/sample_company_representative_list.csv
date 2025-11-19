@@ -1,1 +1,3 @@
 CompanyRepID,Name,CompanyName,Department,Position,Email,Approved
+rep1@technova.com,John Tan,TechNova Solutions,Business Development,Partnership Manager,rep1@technova.com,false
+rep2@arcadia.com,Emily Lee,Arcadia Innovations,Product,Senior Product Manager,rep2@arcadia.com,true

@@ -201,6 +201,7 @@ class InternshipManager {
   +filter(criteria: FilterCriteria): List<Internship>
   +getInternships(): List<Internship>
   +getInternshipsForRep(rep: CompanyRep): List<Internship>
+  +removeInternships(rep: CompanyRep, targets: Collection<Internship>): void
 }
 
 class NotificationManager {
@@ -212,6 +213,8 @@ class NotificationManager {
   +notifyStaffWorkloadReminder(staff: CareerCenterStaff, pendingInternships: int, pendingWithdrawals: int): void
   +notifyRepAccountDecision(rep: CompanyRep, approved: boolean, notes: String): void
   +notifyStudentOfferAwaitingAcceptance(application: Application): void
+  +clearNotificationsForUsers(users: Collection<? extends User>, condition: Predicate<Notification>): void
+  +notifyRepNewApplication(rep: CompanyRep, student: Student, internship: Internship): void
   +consumeNotifications(user: User): List<Notification>
   +peekNotifications(user: User): List<Notification>
   +hasNotifications(user: User): boolean
