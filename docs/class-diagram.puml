@@ -2,6 +2,7 @@
 skinparam classAttributeIconSize 0
 hide empty fields
 
+package entity {
 abstract class User {
   #User(userID: String, name: String, password: String)
   +getUserID(): String
@@ -66,19 +67,6 @@ class Application {
   +requestWithdrawal(reason: String): WithdrawalRequest
 }
 
-class ApplicationManager {
-  +submitApplication(student: Student, internship: Internship): Application
-  +updateStatus(application: Application, status: ApplicationStatus): void
-  +updateStatus(application: Application, status: ApplicationStatus, confirmOffer: boolean): void
-  +enforceRules(student: Student, internship: Internship): boolean
-  +getLastFailureReason(): String
-  +setNotificationManager(notificationManager: NotificationManager): void
-  -assignSlot(application: Application): void
-  -releaseSlot(application: Application): void
-  -markOtherApplications(acceptedApplication: Application): void
-  -notifyStudentOfSuccessfulApplication(application: Application): void
-}
-
 class AccountRequest {
   +AccountRequest(rep: CompanyRep)
   +getRep(): CompanyRep
@@ -133,16 +121,6 @@ class Internship {
   +isFull(): boolean
 }
 
-class InternshipManager {
-  +submitInternship(internship: Internship): Internship
-  +approveInternship(internship: Internship): void
-  +rejectInternship(internship: Internship): void
-  +refreshStatuses(): void
-  +filter(criteria: FilterCriteria): List<Internship>
-  +getInternships(): List<Internship>
-  +getInternshipsForRep(rep: CompanyRep): List<Internship>
-}
-
 class InternshipSlot {
   +InternshipSlot(slotNumber: int)
   +getSlotNumber(): int
@@ -157,6 +135,72 @@ class Notification {
   +getMessage(): String
   +getTimestamp(): LocalDateTime
   +toString(): String
+}
+
+class WithdrawalRequest {
+  +WithdrawalRequest(application: Application, student: Student, reason: String)
+  +getApplication(): Application
+  +getStudent(): Student
+  +getReason(): String
+  +getRequestedOn(): LocalDateTime
+  +getStatus(): WithdrawalStatus
+  +getProcessedBy(): CareerCenterStaff
+  +getProcessedOn(): LocalDateTime
+  +approve(): void
+  +reject(): void
+  +setProcessedBy(processedBy: CareerCenterStaff): void
+  -transition(targetStatus: WithdrawalStatus): void
+}
+
+enum ApplicationStatus {
+  PENDING
+  SUCCESSFUL
+  UNSUCCESSFUL
+  WITHDRAWN
+}
+
+enum InternshipStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FILLED
+}
+
+enum InternshipLevel {
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  WITHDRAWN
+  REJECTED
+}
+}
+
+package control {
+class ApplicationManager {
+  +submitApplication(student: Student, internship: Internship): Application
+  +updateStatus(application: Application, status: ApplicationStatus): void
+  +updateStatus(application: Application, status: ApplicationStatus, confirmOffer: boolean): void
+  +enforceRules(student: Student, internship: Internship): boolean
+  +getLastFailureReason(): String
+  +setNotificationManager(notificationManager: NotificationManager): void
+  -assignSlot(application: Application): void
+  -releaseSlot(application: Application): void
+  -markOtherApplications(acceptedApplication: Application): void
+  -notifyStudentOfSuccessfulApplication(application: Application): void
+}
+
+class InternshipManager {
+  +submitInternship(internship: Internship): Internship
+  +approveInternship(internship: Internship): void
+  +rejectInternship(internship: Internship): void
+  +refreshStatuses(): void
+  +filter(criteria: FilterCriteria): List<Internship>
+  +getInternships(): List<Internship>
+  +getInternshipsForRep(rep: CompanyRep): List<Internship>
 }
 
 class NotificationManager {
@@ -214,26 +258,35 @@ class UserManager {
   -findRequest(repId: String): AccountRequest
 }
 
-class WithdrawalRequest {
-  +WithdrawalRequest(application: Application, student: Student, reason: String)
-  +getApplication(): Application
-  +getStudent(): Student
-  +getReason(): String
-  +getRequestedOn(): LocalDateTime
-  +getStatus(): WithdrawalStatus
-  +getProcessedBy(): CareerCenterStaff
-  +getProcessedOn(): LocalDateTime
-  +approve(): void
-  +reject(): void
-  +setProcessedBy(processedBy: CareerCenterStaff): void
-  -transition(targetStatus: WithdrawalStatus): void
-}
-
 class WithdrawalManager {
   +submitRequest(app: Application, reason: String): WithdrawalRequest
   +processRequest(request: WithdrawalRequest, staff: CareerCenterStaff, approve: boolean): boolean
   +getPendingRequests(): List<WithdrawalRequest>
   -releaseSlot(application: Application): void
+}
+}
+
+package boundary {
+class ConsoleHelper {
+  +ConsoleHelper(scanner: Scanner, catalog: SchoolMajorCatalog)
+  +readLine(prompt: String): String
+  +promptPasswordInput(prompt: String): String
+  +promptYesNo(prompt: String, defaultYes: boolean): boolean
+  +readInt(prompt: String, min: int, max: int, defaultValue: Integer, allowCancel: boolean): Integer
+  +readInt(prompt: String, min: int, max: int): int
+  +readOptionalDate(prompt: String): LocalDate
+  +promptInternshipLevel(): InternshipLevel
+  +promptStatusSelection(): InternshipStatus
+  +promptStudentMajorSelection(): String
+  +promptPreferredMajorSelection(): String
+  +selectInternshipFromList(internships: List<Internship>): Internship
+  +selectApplicationFromList(applications: List<Application>, prompt: String): Application
+  +printInternshipRow(index: int, internship: Internship): void
+}
+
+class InternshipBrowser {
+  +InternshipBrowser(manager: InternshipManager, console: ConsoleHelper)
+  +fetchFilteredInternships(user: User, filter: Predicate<Internship>): List<Internship>
 }
 
 class App {
@@ -249,82 +302,30 @@ class App {
   -registerStudent(): void
   -registerCompanyRep(): void
   -registerCareerCenterStaff(): void
-  -promptPasswordInput(prompt: String): String
-  -promptYesNo(prompt: String, defaultYes: boolean): boolean
-  -readInt(prompt: String, min: int, max: int, defaultValue: Integer, allowCancel: boolean): Integer
-  -readInt(prompt: String, min: int, max: int): int
   -persistStudentRecord(id: String, name: String, major: String, year: int): void
   -persistCompanyRepRecord(id: String, name: String, company: String, department: String, position: String): void
   -persistStaffRecord(id: String, name: String, department: String): void
   -appendCsvLine(path: String, header: String, line: String): void
-  +showStudentMenu(student: Student): void
-  -displayInternshipCatalog(student: Student): void
-  -handleStudentApplication(student: Student): void
-  -showStudentApplications(student: Student): void
-  -handleStudentWithdrawal(student: Student): void
-  -handleAcceptOffer(student: Student): void
-  +showRepMenu(rep: CompanyRep): void
-  -displayRepInternships(rep: CompanyRep): void
-  -handleRepCreateInternship(rep: CompanyRep): void
-  -handleToggleVisibility(rep: CompanyRep): void
-  -handleRepReviewApplications(rep: CompanyRep): void
-  +showStaffMenu(staff: CareerCenterStaff): void
-  -reviewAccountRequests(staff: CareerCenterStaff): void
-  -reviewInternshipSubmissions(staff: CareerCenterStaff): void
-  -processWithdrawalRequests(staff: CareerCenterStaff): void
-  -showReportsMenu(): void
-  -runStatusReport(): void
-  -runMajorReport(): void
-  -runLevelReport(): void
-  -runCompanyReport(): void
-  -getInternshipsOpenToStudents(student: Student): List<Internship>
-  -selectInternshipFromList(internships: List<Internship>): Internship
-  -selectApplicationFromList(applications: List<Application>, prompt: String): Application
-  -handlePasswordChange(user: User): void
-  -readOptionalDate(prompt: String): LocalDate
-  -promptInternshipLevel(): InternshipLevel
-  -promptStatusSelection(): InternshipStatus
-  -promptStudentMajorSelection(): String
-  -promptPreferredMajorSelection(): String
-  -promptMajorSelectionFromCatalog(allowManualEntry: boolean, manualPrompt: String): String
-  -promptMajorSelectionForSchool(school: String): String
-  -promptManualMajorInput(prompt: String): String
-  -formatPreferredMajors(internship: Internship): String
-  -queueStaffWorkloadAlerts(staff: CareerCenterStaff): void
-  -countPendingInternshipSubmissions(): int
   -displayNotifications(user: User): void
-  -fetchFilteredInternships(user: User, additionalFilter: Predicate<Internship>): List<Internship>
-  -promptFilterCriteria(user: User): FilterCriteria
-  -hasFilterValues(criteria: FilterCriteria): boolean
-  -describeFilterCriteria(criteria: FilterCriteria): String
-  -printInternshipRow(index: int, internship: Internship): void
   -updateCompanyRepApproval(repId: String, approved: boolean): void
 }
-
-enum ApplicationStatus {
-  PENDING
-  SUCCESSFUL
-  UNSUCCESSFUL
-  WITHDRAWN
 }
 
-enum InternshipStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  FILLED
+package menu {
+class StudentMenu {
+  +StudentMenu(console: ConsoleHelper, browser: InternshipBrowser, applicationManager: ApplicationManager, internshipManager: InternshipManager, notificationManager: NotificationManager, withdrawalManager: WithdrawalManager, userManager: UserManager, notificationDisplay: Consumer<User>, passwordChanger: Consumer<User>)
+  +show(student: Student): void
 }
 
-enum InternshipLevel {
-  BASIC
-  INTERMEDIATE
-  ADVANCED
+class CompanyRepMenu {
+  +CompanyRepMenu(console: ConsoleHelper, browser: InternshipBrowser, internshipManager: InternshipManager, applicationManager: ApplicationManager, notificationManager: NotificationManager, userManager: UserManager, notificationDisplay: Consumer<User>, passwordChanger: Consumer<User>)
+  +show(rep: CompanyRep): void
 }
 
-enum WithdrawalStatus {
-  PENDING
-  WITHDRAWN
-  REJECTED
+class StaffMenu {
+  +StaffMenu(console: ConsoleHelper, internshipManager: InternshipManager, userManager: UserManager, withdrawalManager: WithdrawalManager, notificationManager: NotificationManager, reportGenerator: ReportGenerator, notificationDisplay: Consumer<User>, passwordChanger: Consumer<User>, approvalUpdater: BiConsumer<String, Boolean>)
+  +show(staff: CareerCenterStaff): void
+}
 }
 
 Student --|> User
@@ -365,5 +366,10 @@ App "1" --> "1" NotificationManager
 App "1" --> "1" WithdrawalManager
 App "1" --> "1" ReportGenerator
 App "1" --> "1" SchoolMajorCatalog
+App "1" --> "1" ConsoleHelper
+App "1" --> "1" InternshipBrowser
+App "1" --> "1" StudentMenu
+App "1" --> "1" CompanyRepMenu
+App "1" --> "1" StaffMenu
 
 @enduml
