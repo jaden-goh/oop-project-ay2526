@@ -1,3 +1,5 @@
+package entity;
+
 public abstract class User {
     public static final String DEFAULT_PASSWORD = "password";
 

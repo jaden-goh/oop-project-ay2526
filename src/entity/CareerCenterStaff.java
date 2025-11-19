@@ -1,3 +1,9 @@
+package entity;
+
+import control.InternshipManager;
+import control.UserManager;
+import control.WithdrawalManager;
+
 public class CareerCenterStaff extends User {
     private String staffDepartment;
 

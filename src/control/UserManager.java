@@ -1,3 +1,11 @@
+package control;
+
+import entity.AccountRequest;
+import entity.CareerCenterStaff;
+import entity.CompanyRep;
+import entity.Student;
+import entity.User;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

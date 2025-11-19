@@ -1,3 +1,13 @@
+package control;
+
+import entity.Application;
+import entity.ApplicationStatus;
+import entity.Internship;
+import entity.InternshipLevel;
+import entity.InternshipSlot;
+import entity.InternshipStatus;
+import entity.Student;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

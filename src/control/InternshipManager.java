@@ -1,3 +1,10 @@
+package control;
+
+import entity.CompanyRep;
+import entity.FilterCriteria;
+import entity.Internship;
+import entity.InternshipStatus;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;

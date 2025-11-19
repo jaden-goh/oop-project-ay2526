@@ -1,3 +1,12 @@
+package control;
+
+import entity.Application;
+import entity.CareerCenterStaff;
+import entity.Internship;
+import entity.InternshipSlot;
+import entity.InternshipStatus;
+import entity.WithdrawalRequest;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

@@ -1,3 +1,5 @@
+package entity;
+
 public class InternshipSlot {
     private final int slotNumber;
     private Student assignedStudent;

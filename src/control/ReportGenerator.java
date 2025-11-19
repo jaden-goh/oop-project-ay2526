@@ -1,3 +1,10 @@
+package control;
+
+import entity.Internship;
+import entity.InternshipLevel;
+import entity.InternshipStatus;
+import entity.InternshipSlot;
+
 import java.util.ArrayList;
 import java.util.List;
 

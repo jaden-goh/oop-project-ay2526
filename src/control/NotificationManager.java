@@ -1,3 +1,13 @@
+package control;
+
+import entity.Application;
+import entity.CareerCenterStaff;
+import entity.CompanyRep;
+import entity.Internship;
+import entity.Notification;
+import entity.Student;
+import entity.User;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;

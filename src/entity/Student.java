@@ -1,3 +1,8 @@
+package entity;
+
+import control.ApplicationManager;
+import control.WithdrawalManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
