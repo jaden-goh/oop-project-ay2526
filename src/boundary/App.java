@@ -120,7 +120,7 @@ public class App {
                 System.out.println("Login cancelled.");
                 return null;
             }
-            String password = readPassword("Password (type 'reset' to reset, 'cancel' to exit)");
+            String password = console.readLine("Password (type 'reset' to reset, 'cancel' to exit): ");
             if ("cancel".equalsIgnoreCase(password)) {
                 System.out.println("Login cancelled.");
                 return null;
@@ -165,16 +165,6 @@ public class App {
         } else {
             System.out.println("Password updated. Use it to log in.");
         }
-    }
-
-    private String readPassword(String prompt) {
-        Console console = System.console();
-        if (console != null) {
-            char[] chars = console.readPassword(prompt + ": ");
-            return chars == null ? "" : new String(chars);
-        }
-        System.out.print(prompt + " (input visible): ");
-        return scanner.nextLine();
     }
 
     private void routeUser(User user) {
@@ -345,12 +335,12 @@ public class App {
 
     private void handlePasswordChange(User user) {
         while (true) {
-            String newPassword = readPassword("New password (min 8 chars, type 'cancel' to exit)");
+            String newPassword = console.readLine("New password (min 8 chars, type 'cancel' to exit): ");
             if ("cancel".equalsIgnoreCase(newPassword)) {
                 System.out.println("Password change cancelled.");
                 return;
             }
-            String confirm = readPassword("Confirm new password");
+            String confirm = console.readLine("Confirm new password: ");
             if (!newPassword.equals(confirm)) {
                 System.out.println("Passwords do not match. Try again.");
                 continue;

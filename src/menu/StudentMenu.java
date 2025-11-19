@@ -78,7 +78,9 @@ public class StudentMenu {
     }
 
     private void displayInternshipCatalog(Student student) {
-        List<Internship> internships = internshipBrowser.fetchFilteredInternships(student, null);
+        List<Internship> internships = internshipBrowser.fetchFilteredInternships(
+                student, internship -> internship.getStatus() == InternshipStatus.APPROVED
+                        && internship.isVisible());
         if (internships.isEmpty()) {
             System.out.println("No internships available yet.");
             return;

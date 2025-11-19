@@ -7,6 +7,7 @@ import entity.InternshipStatus;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -94,5 +95,13 @@ public class InternshipManager {
                 .filter(internship -> internship.getRepInCharge() == rep)
                 .collect(Collectors.toList());
         return Collections.unmodifiableList(result);
+    }
+
+    public void removeInternships(CompanyRep rep, Collection<Internship> targets) {
+        if (rep == null || targets == null || targets.isEmpty()) {
+            return;
+        }
+        internships.removeIf(internship ->
+                internship.getRepInCharge() == rep && targets.contains(internship));
     }
 }

@@ -2,6 +2,7 @@ package control;
 
 import entity.Application;
 import entity.ApplicationStatus;
+import entity.CompanyRep;
 import entity.Internship;
 import entity.InternshipLevel;
 import entity.InternshipSlot;
@@ -30,6 +31,7 @@ public class ApplicationManager {
         Application application = new Application(student, internship);
         internship.addApplication(application);
         student.getApplications().add(application);
+        notifyRepOfNewApplication(student, internship);
         submissionNotifications.add(LocalDateTime.now() + " :: "
                 + student.getName() + " applied for " + internship.getTitle());
         Reason = "";
@@ -165,6 +167,17 @@ public class ApplicationManager {
             return;
         }
         notificationManager.notifyStudentOfferAwaitingAcceptance(application);
+    }
+
+    private void notifyRepOfNewApplication(Student student, Internship internship) {
+        if (notificationManager == null || student == null || internship == null) {
+            return;
+        }
+        CompanyRep rep = internship.getRepInCharge();
+        if (rep == null) {
+            return;
+        }
+        notificationManager.notifyRepNewApplication(rep, student, internship);
     }
 
 }

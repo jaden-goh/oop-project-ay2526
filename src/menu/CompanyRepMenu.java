@@ -14,7 +14,10 @@ import entity.InternshipLevel;
 import entity.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class CompanyRepMenu {
@@ -54,7 +57,7 @@ public class CompanyRepMenu {
         while (!exit) {
             notificationDisplay.accept(rep);
             System.out.println("\n=== Company Rep Dashboard: " + rep.getName() + " ===");
-            System.out.println("1. View my internships");
+            System.out.println("1. Manage my internships");
             System.out.println("2. Create a new internship");
             System.out.println("3. Toggle internship visibility");
             System.out.println("4. Review applications");
@@ -62,7 +65,7 @@ public class CompanyRepMenu {
             System.out.println("6. Back to main menu");
             String choice = console.readLine("Choice: ");
             switch (choice) {
-                case "1" -> displayRepInternships(rep);
+                case "1" -> manageRepInternships(rep);
                 case "2" -> handleRepCreateInternship(rep);
                 case "3" -> handleToggleVisibility(rep);
                 case "4" -> handleRepReviewApplications(rep);
@@ -73,7 +76,7 @@ public class CompanyRepMenu {
         }
     }
 
-    private void displayRepInternships(CompanyRep rep) {
+    private void manageRepInternships(CompanyRep rep) {
         List<Internship> mine = internshipBrowser.fetchFilteredInternships(
                 rep, internship -> internship.getRepInCharge() == rep);
         if (mine.isEmpty()) {
@@ -84,6 +87,42 @@ public class CompanyRepMenu {
         for (int i = 0; i < mine.size(); i++) {
             console.printInternshipRow(i + 1, mine.get(i));
         }
+        if (!console.promptYesNo("Delete internships from this list? (y/n): ", false)) {
+            return;
+        }
+        String selection = console.readLine("Enter numbers to delete (comma separated, 0 to cancel): ");
+        if (selection.isBlank() || "0".equals(selection.trim())) {
+            System.out.println("Deletion cancelled.");
+            return;
+        }
+        String[] tokens = selection.split(",");
+        Set<Integer> indexes = new HashSet<>();
+        for (String token : tokens) {
+            try {
+                int value = Integer.parseInt(token.trim());
+                if (value < 1 || value > mine.size()) {
+                    System.out.println("Ignoring invalid selection: " + token.trim());
+                    continue;
+                }
+                indexes.add(value - 1);
+            } catch (NumberFormatException e) {
+                System.out.println("Ignoring invalid selection: " + token.trim());
+            }
+        }
+        if (indexes.isEmpty()) {
+            System.out.println("No valid selections to delete.");
+            return;
+        }
+        List<Internship> toRemove = new ArrayList<>();
+        for (Integer idx : indexes) {
+            toRemove.add(mine.get(idx));
+        }
+        if (!console.promptYesNo("Confirm deletion of " + toRemove.size() + " internship(s)? (y/n): ", false)) {
+            System.out.println("Deletion cancelled.");
+            return;
+        }
+        internshipManager.removeInternships(rep, toRemove);
+        System.out.println(toRemove.size() + " internship(s) removed.");
     }
 
     private void handleRepCreateInternship(CompanyRep rep) {

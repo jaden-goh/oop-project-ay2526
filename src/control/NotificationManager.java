@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class NotificationManager {
     private final Map<String, List<Notification>> inbox = new HashMap<>();
@@ -84,16 +85,34 @@ public class NotificationManager {
         if (rep == null) {
             return;
         }
-        String message;
         if (approved) {
-            message = "Your company representative account has been approved. You may now log in.";
-        } else {
-            message = "Your company representative account was rejected.";
-            if (notes != null && !notes.isBlank()) {
-                message += " Reason: " + notes;
-            }
+            return;
+        }
+        String message = "Your company representative account was rejected.";
+        if (notes != null && !notes.isBlank()) {
+            message += " Reason: " + notes;
         }
         notifyUser(rep, message);
+    }
+
+    public void clearNotificationsForUsers(Collection<? extends User> users,
+                                           Predicate<Notification> condition) {
+        if (users == null || users.isEmpty() || condition == null) {
+            return;
+        }
+        for (User user : users) {
+            if (user == null) {
+                continue;
+            }
+            List<Notification> notifications = inbox.get(user.getUserID());
+            if (notifications == null || notifications.isEmpty()) {
+                continue;
+            }
+            notifications.removeIf(condition);
+            if (notifications.isEmpty()) {
+                inbox.remove(user.getUserID());
+            }
+        }
     }
 
     public void notifyStudentOfferAwaitingAcceptance(Application application) {
@@ -108,6 +127,15 @@ public class NotificationManager {
         String message = "Application for " + internship.getTitle()
                 + " at " + internship.getCompanyName() + " is awaiting your acceptance.";
         notifyUser(student, message);
+    }
+
+    public void notifyRepNewApplication(CompanyRep rep, Student student, Internship internship) {
+        if (rep == null || student == null || internship == null) {
+            return;
+        }
+        String message = "New application received from " + student.getName()
+                + " for " + internship.getTitle() + ".";
+        notifyUser(rep, message);
     }
 
     public List<Notification> consumeNotifications(User user) {

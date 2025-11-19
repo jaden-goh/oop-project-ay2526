@@ -99,12 +99,20 @@ public class StaffMenu {
             approvalUpdater.accept(request.getRep().getUserID(), true);
             System.out.println("Account approved for " + request.getRep().getUserID());
             notificationManager.notifyRepAccountDecision(request.getRep(), true, null);
+            notificationManager.clearNotificationsForUsers(
+                    userManager.getCareerCenterStaffMembers(),
+                    notification -> notification.getMessage() != null
+                            && notification.getMessage().equals(repRegistrationMessage(request.getRep())));
         } else {
             String notes = console.readLine("Reason for rejection: ");
             staff.rejectRepAccount(userManager, request, notes);
             approvalUpdater.accept(request.getRep().getUserID(), false);
             System.out.println("Account rejected.");
             notificationManager.notifyRepAccountDecision(request.getRep(), false, notes);
+            notificationManager.clearNotificationsForUsers(
+                    userManager.getCareerCenterStaffMembers(),
+                    notification -> notification.getMessage() != null
+                            && notification.getMessage().equals(repRegistrationMessage(request.getRep())));
         }
     }
 
@@ -135,6 +143,10 @@ public class StaffMenu {
             staff.rejectInternship(internshipManager, target);
             System.out.println("Internship rejected.");
         }
+        notificationManager.clearNotificationsForUsers(
+                userManager.getCareerCenterStaffMembers(),
+                notification -> notification.getMessage() != null
+                        && notification.getMessage().equals(internshipSubmissionMessage(target)));
     }
 
     private void processWithdrawalRequests(CareerCenterStaff staff) {
@@ -158,6 +170,36 @@ public class StaffMenu {
         boolean approve = console.promptYesNo("Approve this withdrawal? (y/n): ", true);
         staff.processWithdrawal(withdrawalManager, target, approve);
         System.out.println("Withdrawal request processed.");
+        notificationManager.clearNotificationsForUsers(
+                userManager.getCareerCenterStaffMembers(),
+                notification -> notification.getMessage() != null
+                        && notification.getMessage().equals(withdrawalRequestMessage(target)));
+    }
+
+    private String repRegistrationMessage(CompanyRep rep) {
+        if (rep == null) {
+            return "";
+        }
+        return "New company representative registration awaiting approval: "
+                + rep.getName() + " (" + rep.getUserID() + ") from "
+                + rep.getCompanyName() + ".";
+    }
+
+    private String internshipSubmissionMessage(Internship internship) {
+        if (internship == null) {
+            return "";
+        }
+        return "New internship submission pending review: "
+                + internship.getTitle() + " from " + internship.getCompanyName() + ".";
+    }
+
+    private String withdrawalRequestMessage(WithdrawalRequest request) {
+        if (request == null || request.getStudent() == null || request.getApplication() == null
+                || request.getApplication().getInternship() == null) {
+            return "";
+        }
+        return "Withdrawal request submitted by " + request.getStudent().getName()
+                + " for " + request.getApplication().getInternship().getTitle() + ".";
     }
 
     private void showReportsMenu() {
