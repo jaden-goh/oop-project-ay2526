@@ -92,9 +92,6 @@ public class CompanyRep extends User {
         if (on && internship.getStatus() == InternshipStatus.PENDING) {
             manager.approveInternship(internship);
         }
-        if (!on && internship.getStatus() == InternshipStatus.APPROVED) {
-            internship.setStatus(InternshipStatus.PENDING);
-        }
     }
 
     public List<Internship> getInternships(InternshipManager manager) {

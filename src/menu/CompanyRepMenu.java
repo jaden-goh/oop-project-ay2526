@@ -137,6 +137,10 @@ public class CompanyRepMenu {
         String preferredMajor = console.promptPreferredMajorSelection();
         LocalDate openDate = console.readOptionalDate("Open date (yyyy-MM-dd, blank for immediate): ");
         LocalDate closeDate = console.readOptionalDate("Close date (yyyy-MM-dd, blank for none): ");
+        if (openDate != null && closeDate != null && closeDate.isBefore(openDate)) {
+            System.out.println("Closing date cannot be earlier than the opening date.");
+            return;
+        }
         int slots = console.readInt("Number of slots (1-10): ", 1, 10);
         try {
             Internship internship = rep.createInternship(internshipManager, title, description,

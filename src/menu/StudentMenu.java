@@ -15,7 +15,6 @@ import entity.InternshipStatus;
 import entity.Student;
 import entity.User;
 import entity.WithdrawalRequest;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -65,7 +64,7 @@ public class StudentMenu {
             System.out.println("7. Back to main menu");
             String choice = console.readLine("Choice: ");
             switch (choice) {
-                case "1" -> displayInternshipCatalog(student);
+                case "1" -> displayInternships(student);
                 case "2" -> handleStudentApplication(student);
                 case "3" -> showStudentApplications(student);
                 case "4" -> handleStudentWithdrawal(student);
@@ -77,10 +76,9 @@ public class StudentMenu {
         }
     }
 
-    private void displayInternshipCatalog(Student student) {
+    private void displayInternships(Student student) {
         List<Internship> internships = internshipBrowser.fetchFilteredInternships(
-                student, internship -> internship.getStatus() == InternshipStatus.APPROVED
-                        && internship.isVisible());
+                student, internship -> isInternshipAvailableToStudent(student, internship));
         if (internships.isEmpty()) {
             System.out.println("No internships available yet.");
             return;
@@ -186,22 +184,28 @@ public class StudentMenu {
 
     private List<Internship> getInternshipsOpenToStudents(Student student) {
         List<Internship> available = new ArrayList<>();
-        String studentMajor = student.getMajor();
-        int studentYear = student.getYearOfStudy();
         for (Internship internship : internshipManager.getInternships()) {
-            if (internship.getStatus() != InternshipStatus.APPROVED
-                    || !internship.isVisible() || internship.isFull()) {
-                continue;
+            if (isInternshipAvailableToStudent(student, internship)) {
+                available.add(internship);
             }
-            if (!internship.acceptsMajor(studentMajor)) {
-                continue;
-            }
-            InternshipLevel level = internship.getLevel();
-            if (studentYear <= 2 && level != null && level != InternshipLevel.BASIC) {
-                continue;
-            }
-            available.add(internship);
         }
         return available;
+    }
+
+    private boolean isInternshipAvailableToStudent(Student student, Internship internship) {
+        if (student == null || internship == null) {
+            return false;
+        }
+        if (internship.getStatus() != InternshipStatus.APPROVED
+                || !internship.isVisible()
+                || internship.isFull()) {
+            return false;
+        }
+        if (!internship.acceptsMajor(student.getMajor())) {
+            return false;
+        }
+        InternshipLevel level = internship.getLevel();
+        int studentYear = student.getYearOfStudy();
+        return !(studentYear <= 2 && level != null && level != InternshipLevel.BASIC);
     }
 }
