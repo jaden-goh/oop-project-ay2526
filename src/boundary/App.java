@@ -159,6 +159,11 @@ public class App {
             System.out.println("Passwords do not match. Reset cancelled.");
             return;
         }
+        User target = userManager.findUserById(id);
+        if (target != null && newPass.equals(target.getPassword())) {
+            System.out.println("New password matches the old password. Please choose a different password.");
+            return;
+        }
         if (!userManager.resetPassword(id, newPass)) {
             System.out.println("Unable to reset password. Ensure the account exists and password meets requirements.");
         } else {
@@ -264,7 +269,13 @@ public class App {
             return;
         }
         String department = console.readLine("Department: ");
+        if (department == null || department.isBlank()) {
+            department = "N.A.";
+        }
         String position = console.readLine("Position: ");
+        if (position == null || position.isBlank()) {
+            position = "N.A.";
+        }
         if (!console.promptYesNo("Submit registration for approval? (y/n): ", true)) {
             System.out.println("Registration cancelled.");
             return;

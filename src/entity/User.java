@@ -59,4 +59,9 @@ public abstract class User {
         this.password = newPass;
         System.out.println("Password changed for user " + userID);
     }
+
+    public String getPassword() {
+        return password;
+    }
+
 }

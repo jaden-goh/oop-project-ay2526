@@ -40,7 +40,7 @@ public class UserManager {
             return null;
         }
         String trimmedId = id.trim();
-        User target = findUser(trimmedId);
+        User target = findUserById(trimmedId);
         if (target == null) {
             lastLoginMessage = "No account was found for ID '" + trimmedId + "'. Use the registration option if needed.";
             return null;
@@ -76,7 +76,7 @@ public class UserManager {
     }
 
     public boolean resetPassword(String id, String newPassword) {
-        User user = findUser(id);
+        User user = findUserById(id);
         if (user == null) {
             return false;
         }
@@ -347,7 +347,7 @@ public class UserManager {
         }
     }
 
-    private User findUser(String id) {
+    public User findUserById(String id) {
         if (id == null) {
             return null;
         }
