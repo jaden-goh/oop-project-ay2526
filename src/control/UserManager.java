@@ -5,18 +5,13 @@ import entity.CareerCenterStaff;
 import entity.CompanyRep;
 import entity.Student;
 import entity.User;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 public class UserManager {
@@ -27,8 +22,6 @@ public class UserManager {
 
     private final List<User> users = new ArrayList<>();
     private final List<AccountRequest> accountRequests = new ArrayList<>();
-    private final List<String> bootstrapUserIds = new ArrayList<>();
-    private boolean bootstrapMode;
     private String lastLoginMessage = "";
 
     public void loadAllUsers(File studentFile, File staffFile, File companyFile) {
@@ -57,7 +50,21 @@ public class UserManager {
             return null;
         }
         if (target instanceof CompanyRep rep && !rep.isApproved()) {
-            lastLoginMessage = "Company representative account pending approval. Career Center staff will notify you once approved.";
+            AccountRequest latestRequest = findLatestRequestForRep(rep.getUserID());
+            if (latestRequest != null && AccountRequest.STATUS_REJECTED.equals(latestRequest.getStatus())) {
+                String approverName = latestRequest.getApprover() != null
+                        ? latestRequest.getApprover().getName()
+                        : "Career Center staff";
+                StringBuilder builder = new StringBuilder("Account rejected by ").append(approverName);
+                if (latestRequest.getDecisionNotes() != null && !latestRequest.getDecisionNotes().isBlank()) {
+                    builder.append(". Notes: ").append(latestRequest.getDecisionNotes());
+                } else {
+                    builder.append(". Contact the Career Center for details.");
+                }
+                lastLoginMessage = builder.toString();
+            } else {
+                lastLoginMessage = "Company representative account pending approval. Career Center staff will notify you once approved.";
+            }
             return null;
         }
         lastLoginMessage = "Login successful.";
@@ -312,9 +319,6 @@ public class UserManager {
             return false;
         }
         users.add(user);
-        if (bootstrapMode) {
-            bootstrapUserIds.add(user.getUserID().toLowerCase(Locale.ROOT));
-        }
         return true;
     }
 
@@ -362,6 +366,19 @@ public class UserManager {
         for (AccountRequest request : accountRequests) {
             if (request.getRep() != null && request.getRep().getUserID().equalsIgnoreCase(repId)
                     && AccountRequest.STATUS_PENDING.equals(request.getStatus())) {
+                return request;
+            }
+        }
+        return null;
+    }
+
+    private AccountRequest findLatestRequestForRep(String repId) {
+        if (repId == null) {
+            return null;
+        }
+        for (int i = accountRequests.size() - 1; i >= 0; i--) {
+            AccountRequest request = accountRequests.get(i);
+            if (request.getRep() != null && request.getRep().getUserID().equalsIgnoreCase(repId)) {
                 return request;
             }
         }
