@@ -120,11 +120,13 @@ public class ConsoleHelper {
     }
 
     public String promptPreferredMajorSelection() {
-        if (!promptYesNo("Specify a preferred major? (y/n): ", false)) {
-            return "";
+        while (true) {
+            String major = promptMajorSelectionFromCatalog(true, "Preferred major: ");
+            if (major != null && !major.isBlank()) {
+                return major;
+            }
+            System.out.println("Preferred major is required.");
         }
-        String major = promptMajorSelectionFromCatalog(true, "Preferred major: ");
-        return major == null ? "" : major;
     }
 
     public Internship selectInternshipFromList(List<Internship> internships) {

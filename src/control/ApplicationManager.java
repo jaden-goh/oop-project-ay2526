@@ -48,11 +48,9 @@ public class ApplicationManager {
         }
         application.setStatus(status);
         if (status == ApplicationStatus.SUCCESSFUL) {
-            markOtherApplications(application);
             if (!confirmOffer) {
                 notifyStudentOfSuccessfulApplication(application);
-            }
-            if (confirmOffer) {
+            } else {
                 assignSlot(application);
             }
         } else if (status == ApplicationStatus.UNSUCCESSFUL) {
@@ -149,15 +147,6 @@ public class ApplicationManager {
                 slot.release();
                 internship.setStatus(InternshipStatus.APPROVED);
                 break;
-            }
-        }
-    }
-
-    private void markOtherApplications(Application acceptedApplication) {
-        Student student = acceptedApplication.getStudent();
-        for (Application application : student.getApplications()) {
-            if (application != acceptedApplication && application.getStatus() == ApplicationStatus.PENDING) {
-                application.setStatus(ApplicationStatus.UNSUCCESSFUL);
             }
         }
     }

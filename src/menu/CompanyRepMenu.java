@@ -13,7 +13,6 @@ import entity.Internship;
 import entity.InternshipLevel;
 import entity.InternshipStatus;
 import entity.User;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -136,15 +135,7 @@ public class CompanyRepMenu {
         InternshipLevel level = console.promptInternshipLevel();
         String preferredMajor = console.promptPreferredMajorSelection();
         LocalDate openDate = console.readOptionalDate("Open date (yyyy-MM-dd, blank for immediate): ");
-        LocalDate closeDate = console.readOptionalDate("Close date (yyyy-MM-dd, blank for none): ");
-        if (closeDate != null && closeDate.isBefore(LocalDate.now())) {
-            System.out.println("Closing date cannot be in the past.");
-            return;
-        }
-        if (openDate != null && closeDate != null && closeDate.isBefore(openDate)) {
-            System.out.println("Closing date cannot be earlier than the opening date.");
-            return;
-        }
+        LocalDate closeDate = promptValidCloseDate(openDate);
         int slots = console.readInt("Number of slots (1-10): ", 1, 10);
         try {
             Internship internship = rep.createInternship(internshipManager, title, description,
@@ -193,23 +184,35 @@ public class CompanyRepMenu {
             System.out.println(index++ + ". " + application.getStudent().getName()
                     + " - " + application.getStatus());
         }
-        if (!console.promptYesNo("Update an application status? (y/n): ", false)) {
-            return;
-        }
         Application target = console.selectApplicationFromList(applications, "Select application to update (0 to cancel): ");
         if (target == null) {
             return;
         }
-        System.out.println("1. Pending");
-        System.out.println("2. Successful");
-        System.out.println("3. Unsuccessful");
-        int choice = console.readInt("Select new status: ", 1, 3);
-        ApplicationStatus status = switch (choice) {
-            case 2 -> ApplicationStatus.SUCCESSFUL;
-            case 3 -> ApplicationStatus.UNSUCCESSFUL;
-            default -> ApplicationStatus.PENDING;
-        };
+        System.out.println("1. Successful");
+        System.out.println("2. Unsuccessful");
+        int choice = console.readInt("Select new status: ", 1, 2);
+        ApplicationStatus status = choice == 1
+                ? ApplicationStatus.SUCCESSFUL
+                : ApplicationStatus.UNSUCCESSFUL;
         applicationManager.updateStatus(target, status);
         System.out.println("Application status updated to " + status);
+    }
+
+    private LocalDate promptValidCloseDate(LocalDate openDate) {
+        while (true) {
+            LocalDate closeDate = console.readOptionalDate("Close date (yyyy-MM-dd, blank for none): ");
+            if (closeDate == null) {
+                return null;
+            }
+            if (closeDate.isBefore(LocalDate.now())) {
+                System.out.println("Closing date cannot be in the past.");
+                continue;
+            }
+            if (openDate != null && closeDate.isBefore(openDate)) {
+                System.out.println("Closing date cannot be earlier than the opening date.");
+                continue;
+            }
+            return closeDate;
+        }
     }
 }
