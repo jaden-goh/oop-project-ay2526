@@ -174,10 +174,6 @@ public class ConsoleHelper {
                 + " | Slots: " + filledSlots + "/" + totalSlots);
     }
 
-    public Scanner getScanner() {
-        return scanner;
-    }
-
     private String promptMajorSelectionFromCatalog(boolean allowManualEntry, String manualPrompt) {
         if (schoolMajorCatalog == null || schoolMajorCatalog.isEmpty()) {
             return allowManualEntry ? promptManualMajorInput(manualPrompt) : null;

@@ -184,10 +184,11 @@ public class CompanyRepMenu {
             System.out.println(index++ + ". " + application.getStudent().getName()
                     + " - " + application.getStatus());
         }
-        Application target = console.selectApplicationFromList(applications, "Select application to update (0 to cancel): ");
-        if (target == null) {
+        int selectionIndex = console.readInt("Select application to update (0 to cancel): ", 0, applications.size());
+        if (selectionIndex == 0) {
             return;
         }
+        Application target = applications.get(selectionIndex - 1);
         System.out.println("1. Successful");
         System.out.println("2. Unsuccessful");
         int choice = console.readInt("Select new status: ", 1, 2);
