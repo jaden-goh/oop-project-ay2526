@@ -1,3 +1,5 @@
+// documented
+
 package control;
 
 import entity.AccountRequest;
@@ -14,22 +16,67 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * Manages all user-related operations in the system.
+ *
+ * <p>Responsibilities include:</p>
+ * <ul>
+ *     <li>Loading users (students, staff, company reps) from CSV files</li>
+ *     <li>Registration of new users</li>
+ *     <li>Login and password reset</li>
+ *     <li>Tracking and processing company representative account requests</li>
+ *     <li>Providing filtered views of account requests and staff members</li>
+ * </ul>
+ */
 public class UserManager {
+
+    /** Validation pattern for student IDs (e.g., U1234567A). */
     private static final Pattern STUDENT_ID_PATTERN = Pattern.compile("^U\\d{7}[A-Z]$");
+
+    /** Validation pattern for career center staff IDs (e.g., ABC123). */
     private static final Pattern STAFF_ID_PATTERN = Pattern.compile("^[A-Za-z]{3}\\d{3}$");
+
+    /** Simple email format pattern for company representative IDs. */
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+
+    /** Default page size for paginated pending account request listing. */
     private static final int DEFAULT_PENDING_PAGE_SIZE = 10;
 
+    /** All registered users in the system. */
     private final List<User> users = new ArrayList<>();
+
+    /** All company representative account approval requests. */
     private final List<AccountRequest> accountRequests = new ArrayList<>();
+
+    /** Last login-related message (e.g., success/failure reason) for display. */
     private String lastLoginMessage = "";
 
+    /**
+     * Loads all users (students, staff, company representatives) from their respective files.
+     *
+     * @param studentFile CSV file containing student records
+     * @param staffFile   CSV file containing staff records
+     * @param companyFile CSV file containing company representative records
+     */
     public void loadAllUsers(File studentFile, File staffFile, File companyFile) {
         loadStudents(studentFile);
         loadStaff(staffFile);
         loadCompanyRepresentatives(companyFile);
     }
 
+    /**
+     * Logs in a user with the given ID and password.
+     *
+     * <p>Special handling for company representatives:</p>
+     * <ul>
+     *     <li>If the rep is not yet approved, login is blocked and a message is set.</li>
+     *     <li>If the latest account request is rejected, the rejection notes are shown.</li>
+     * </ul>
+     *
+     * @param id   user ID
+     * @param pass password
+     * @return the logged-in {@link User}, or null if login fails
+     */
     public User login(String id, String pass) {
         if (id == null || id.isBlank()) {
             lastLoginMessage = "User ID is required. Enter your assigned ID or register first.";
@@ -71,10 +118,22 @@ public class UserManager {
         return target;
     }
 
+    /**
+     * Returns the last login message with an appended help hint.
+     *
+     * @return a user-friendly login message
+     */
     public String getLastLoginMessage() {
         return lastLoginMessage + " \nNeed help? Contact the Career Center.";
     }
 
+    /**
+     * Attempts to reset the password of a user identified by ID.
+     *
+     * @param id          user ID
+     * @param newPassword the new password
+     * @return true if the password was successfully updated, false otherwise
+     */
     public boolean resetPassword(String id, String newPassword) {
         User user = findUserById(id);
         if (user == null) {
@@ -88,6 +147,16 @@ public class UserManager {
         }
     }
 
+    /**
+     * Registers a new student, performing format and validity checks.
+     *
+     * @param id       student ID (must match NTU pattern)
+     * @param name     student name
+     * @param password password (minimum 8 characters)
+     * @param year     year of study (1–4)
+     * @param major    student major
+     * @return true if registration succeeds, false if validation fails or user already exists
+     */
     public boolean registerStudent(String id, String name, String password, int year, String major) {
         if (id == null || !STUDENT_ID_PATTERN.matcher(id.trim()).matches()) {
             return false;
@@ -105,6 +174,18 @@ public class UserManager {
         return addUser(student);
     }
 
+    /**
+     * Registers a new company representative and creates an associated account request.
+     *
+     * @param id          representative ID (must be a valid email)
+     * @param name        representative name
+     * @param password    password
+     * @param companyName company name
+     * @param department  department (optional)
+     * @param position    position (optional)
+     * @param approved    whether the account is pre-approved
+     * @return true if registration succeeds, false otherwise
+     */
     public boolean registerCompanyRep(String id, String name, String password,
                                       String companyName, String department, String position,
                                       boolean approved) {
@@ -134,6 +215,15 @@ public class UserManager {
         return true;
     }
 
+    /**
+     * Registers a new career center staff member.
+     *
+     * @param id         staff ID (must match staff ID pattern)
+     * @param name       staff name
+     * @param password   password
+     * @param department staff department
+     * @return true if registration succeeds, false otherwise
+     */
     public boolean registerCareerCenterStaff(String id, String name, String password, String department) {
         if (id == null || !STAFF_ID_PATTERN.matcher(id.trim()).matches()) {
             return false;
@@ -149,6 +239,13 @@ public class UserManager {
         return addUser(staff);
     }
 
+    /**
+     * Approves a company representative account request.
+     *
+     * @param repId    representative ID
+     * @param approver staff member who approves the request
+     * @return true if the request exists and is approved; false otherwise
+     */
     public boolean approveRepresentative(String repId, CareerCenterStaff approver) {
         if (repId == null || approver == null) {
             return false;
@@ -166,6 +263,14 @@ public class UserManager {
         return true;
     }
 
+    /**
+     * Rejects a company representative account request, setting optional notes.
+     *
+     * @param repId    representative ID
+     * @param approver staff member who rejects the request
+     * @param notes    optional rejection notes
+     * @return true if the request exists and is rejected; false otherwise
+     */
     public boolean rejectRepresentative(String repId, CareerCenterStaff approver, String notes) {
         if (repId == null || approver == null) {
             return false;
@@ -184,10 +289,23 @@ public class UserManager {
         return true;
     }
 
+    /**
+     * Returns the first page of pending account requests using the default page size.
+     *
+     * @return list of pending account requests
+     */
     public List<AccountRequest> getPendingAccounts() {
         return getPendingAccounts(1, DEFAULT_PENDING_PAGE_SIZE, AccountRequest.STATUS_PENDING);
     }
 
+    /**
+     * Returns a paginated list of account requests filtered by status.
+     *
+     * @param page         page number (1-based)
+     * @param pageSize     number of items per page
+     * @param statusFilter status string or "ALL" (case-insensitive)
+     * @return unmodifiable list of matching account requests on the given page
+     */
     public List<AccountRequest> getPendingAccounts(int page, int pageSize, String statusFilter) {
         if (page < 1) {
             page = 1;
@@ -207,6 +325,11 @@ public class UserManager {
         return Collections.unmodifiableList(matches.subList(fromIndex, toIndex));
     }
 
+    /**
+     * Returns all registered career center staff members.
+     *
+     * @return unmodifiable list of staff members
+     */
     public List<CareerCenterStaff> getCareerCenterStaffMembers() {
         List<CareerCenterStaff> staffMembers = new ArrayList<>();
         for (User user : users) {
@@ -217,6 +340,11 @@ public class UserManager {
         return Collections.unmodifiableList(staffMembers);
     }
 
+    /**
+     * Loads students from a CSV file and registers them.
+     *
+     * @param file CSV file with student records
+     */
     private void loadStudents(File file) {
         if (!isReadable(file)) {
             System.err.println("Student file missing: " + (file == null ? "null" : file.getPath()));
@@ -249,6 +377,11 @@ public class UserManager {
         }
     }
 
+    /**
+     * Loads career center staff from a CSV file and registers them.
+     *
+     * @param file CSV file with staff records
+     */
     private void loadStaff(File file) {
         if (!isReadable(file)) {
             System.err.println("Staff file missing: " + (file == null ? "null" : file.getPath()));
@@ -280,6 +413,11 @@ public class UserManager {
         }
     }
 
+    /**
+     * Loads company representatives from a CSV file and registers them.
+     *
+     * @param file CSV file with representative records
+     */
     private void loadCompanyRepresentatives(File file) {
         if (!isReadable(file)) {
             System.err.println("Company representative file missing: " + (file == null ? "null" : file.getPath()));
@@ -314,6 +452,12 @@ public class UserManager {
         }
     }
 
+    /**
+     * Adds a user to the system if the user is non-null and the ID is not already registered.
+     *
+     * @param user the user to add
+     * @return true if added successfully, false otherwise
+     */
     private boolean addUser(User user) {
         if (user == null || userExists(user.getUserID())) {
             return false;
@@ -322,6 +466,12 @@ public class UserManager {
         return true;
     }
 
+    /**
+     * Checks if a user with the given ID already exists (case-insensitive).
+     *
+     * @param id user ID
+     * @return true if the user exists, false otherwise
+     */
     private boolean userExists(String id) {
         if (id == null) {
             return false;
@@ -334,10 +484,23 @@ public class UserManager {
         return false;
     }
 
+    /**
+     * Checks if a file is readable (non-null, exists, is a regular file, and readable).
+     *
+     * @param file the file to check
+     * @return true if readable, false otherwise
+     */
     private boolean isReadable(File file) {
         return file != null && file.exists() && file.isFile() && file.canRead();
     }
 
+    /**
+     * Parses a string into an integer, falling back to a default value if parsing fails.
+     *
+     * @param value    the string value to parse
+     * @param fallback fallback value if parsing fails
+     * @return parsed integer or fallback
+     */
     private int parseInt(String value, int fallback) {
         try {
             return Integer.parseInt(value);
@@ -347,6 +510,12 @@ public class UserManager {
         }
     }
 
+    /**
+     * Finds a user by ID (case-insensitive).
+     *
+     * @param id user ID
+     * @return the matching user or null if not found
+     */
     public User findUserById(String id) {
         if (id == null) {
             return null;
@@ -359,6 +528,12 @@ public class UserManager {
         return null;
     }
 
+    /**
+     * Finds the latest pending account request associated with a representative ID.
+     *
+     * @param repId representative ID
+     * @return matching {@link AccountRequest} or null if none found
+     */
     private AccountRequest findRequest(String repId) {
         if (repId == null) {
             return null;
@@ -372,6 +547,13 @@ public class UserManager {
         return null;
     }
 
+    /**
+     * Finds the latest (most recent) account request for the given representative ID,
+     * regardless of status.
+     *
+     * @param repId representative ID
+     * @return the latest {@link AccountRequest} or null if none found
+     */
     private AccountRequest findLatestRequestForRep(String repId) {
         if (repId == null) {
             return null;
