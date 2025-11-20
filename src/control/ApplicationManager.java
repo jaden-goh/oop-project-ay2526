@@ -137,6 +137,7 @@ public class ApplicationManager {
         }
         if (internship.isFull()) {
             internship.setStatus(InternshipStatus.FILLED);
+            markUnassignedApplicationsUnsuccessful(internship);
         }
     }
 
@@ -147,9 +148,33 @@ public class ApplicationManager {
                 slot.release();
                 internship.setStatus(InternshipStatus.APPROVED);
                 break;
+        }
+    }
+
+    private void markUnassignedApplicationsUnsuccessful(Internship internship) {
+        if (internship == null) {
+            return;
+        }
+        for (Application other : internship.getApplications()) {
+            Student applicant = other.getStudent();
+            if (!isStudentAssignedToInternship(internship, applicant)) {
+                other.setStatus(ApplicationStatus.UNSUCCESSFUL);
             }
         }
     }
+
+    private boolean isStudentAssignedToInternship(Internship internship, Student student) {
+        if (internship == null || student == null) {
+            return false;
+        }
+        for (InternshipSlot slot : internship.getSlots()) {
+            if (slot.getAssignedStudent() == student) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
 
     private void notifyStudentOfSuccessfulApplication(Application application) {
         if (notificationManager == null) {
