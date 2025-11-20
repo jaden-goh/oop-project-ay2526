@@ -72,7 +72,7 @@ public class UserManager {
     }
 
     public String getLastLoginMessage() {
-        return lastLoginMessage + " Need help? Contact the Career Center or use the reset prompts.";
+        return lastLoginMessage + " \nNeed help? Contact the Career Center.";
     }
 
     public boolean resetPassword(String id, String newPassword) {

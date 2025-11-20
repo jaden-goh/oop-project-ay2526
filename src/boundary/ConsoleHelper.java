@@ -42,9 +42,6 @@ public class ConsoleHelper {
     public boolean promptYesNo(String prompt, boolean defaultYes) {
         while (true) {
             String input = readLine(prompt);
-            if (input.isEmpty()) {
-                return defaultYes;
-            }
             if ("y".equalsIgnoreCase(input) || "yes".equalsIgnoreCase(input)) {
                 return true;
             }
