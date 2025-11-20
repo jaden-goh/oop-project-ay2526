@@ -270,11 +270,11 @@ public class App {
         }
         String department = console.readLine("Department: ");
         if (department == null || department.isBlank()) {
-            department = "N.A.";
+            department = "NA";
         }
         String position = console.readLine("Position: ");
         if (position == null || position.isBlank()) {
-            position = "N.A.";
+            position = "NA";
         }
         if (!console.promptYesNo("Submit registration for approval? (y/n): ", true)) {
             System.out.println("Registration cancelled.");
