@@ -26,31 +26,96 @@ import menu.CompanyRepMenu;
 import menu.StaffMenu;
 import menu.StudentMenu;
 
+/**
+ * Main entry point and composition root of the Internship Placement Management System.
+ *
+ * <p>Responsibilities:</p>
+ * <ul>
+ *     <li>Initialises managers, menus, and shared helpers</li>
+ *     <li>Loads initial user data from CSV files</li>
+ *     <li>Provides the top-level main menu (login, registration, quit)</li>
+ *     <li>Routes authenticated users to role-specific menus</li>
+ *     <li>Handles registration flows and CSV persistence</li>
+ *     <li>Handles password reset and change flows</li>
+ *     <li>Coordinates notification display and company rep approval persistence</li>
+ * </ul>
+ */
+
 public class App {
+
+    /** Validation pattern for student IDs (e.g., U1234567A). */
     private static final Pattern STUDENT_ID_PATTERN = Pattern.compile("^U\\d{7}[A-Z]$");
+
+    /** Validation pattern for staff IDs (e.g., abc123). */
     private static final Pattern STAFF_ID_PATTERN = Pattern.compile("^[A-Za-z]{3}\\d{3}$");
+
+    /** Generic email validation pattern. */
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+
+    /** CSV header for student records. */
     private static final String STUDENT_HEADER = "StudentID,Name,Major,Year,Email";
+
+    /** CSV header for staff records. */
     private static final String STAFF_HEADER = "StaffID,Name,Role,Department,Email";
+
+    /** CSV header for company representative records. */
     private static final String COMPANY_HEADER = "CompanyRepID,Name,CompanyName,Department,Position,Email,Approved";
 
+    /** Manages all user accounts and login/registration logic. */
     private final UserManager userManager = new UserManager();
+
+    /** Manages internship postings and their lifecycle. */
     private final InternshipManager internshipManager = new InternshipManager();
+
+    /** Handles applications and enforcement of application rules. */
     private final ApplicationManager applicationManager = new ApplicationManager();
+
+    /** Dispatches notifications to users. */
     private final NotificationManager notificationManager = new NotificationManager();
+
+    /** Manages withdrawal requests from students. */
     private final WithdrawalManager withdrawalManager = new WithdrawalManager();
+
+    /** Generates reports for Career Center Staff. */
     private final ReportGenerator reportGenerator = new ReportGenerator();
+
+    /** Shared scanner for console input. */
     private final Scanner scanner = new Scanner(System.in);
+
+    /** Catalog of schools and majors used for selection. */
     private final SchoolMajorCatalog schoolMajorCatalog;
+
+    /** Helper for console interaction. */
     private final ConsoleHelper console;
+
+    /** Boundary class for browsing internships with filters. */
     private final InternshipBrowser internshipBrowser;
+
+    /** Student-facing menu. */
     private final StudentMenu studentMenu;
+
+    /** Company representative-facing menu. */
     private final CompanyRepMenu companyRepMenu;
+
+    /** Career Center Staff-facing menu. */
     private final StaffMenu staffMenu;
+
+
+    /** File path to student CSV data. */
     private final String studentDataPath;
+
+    /** File path to staff CSV data. */
     private final String staffDataPath;
+
+    /** File path to company representative CSV data. */
     private final String companyDataPath;
 
+    /**
+     * Constructs the application, initialising all managers, helpers, menus, and loading initial data.
+     *
+     * <p>Also wires callbacks for notification display, password change, and company rep approval
+     * persistence into the role-specific menus.</p>
+     */
     public App() {
         this.studentDataPath = "data/sample_student_list.csv";
         this.staffDataPath = "data/sample_staff_list.csv";
@@ -71,10 +136,25 @@ public class App {
         applicationManager.setNotificationManager(notificationManager);
     }
 
+    /**
+     * Application entry point.
+     *
+     * @param args command-line arguments (ignored)
+     */
     public static void main(String[] args) {
         new App().start();
     }
 
+    /**
+     * Starts the top-level main menu loop.
+     *
+     * <p>Options:</p>
+     * <ul>
+     *     <li>Login</li>
+     *     <li>Register</li>
+     *     <li>Quit</li>
+     * </ul>
+     */
     public void start() {
         boolean running = true;
         while (running) {
@@ -99,6 +179,9 @@ public class App {
         System.out.println("Goodbye.");
     }
 
+    /**
+     * Loads initial user accounts from CSV files for students, staff, and company representatives.
+     */
     private void loadInitialUsers() {
         File studentCsv = new File(studentDataPath);
         File staffCsv = new File(staffDataPath);
@@ -111,6 +194,11 @@ public class App {
     }
 
 
+    /**
+     * Handles the login flow, including reset prompt and retry attempts.
+     *
+     * @return the authenticated {@link User}, or null if login is cancelled or fails
+     */
     private User promptLogin() {
         int attempts = 0;
         while (true) {
@@ -144,6 +232,11 @@ public class App {
         }
     }
 
+    /**
+     * Handles password reset for a given user ID.
+     *
+     * @param id user ID requesting a password reset
+     */
     private void handlePasswordReset(String id) {
         if (id == null || id.isBlank()) {
             System.out.println("Provide your user ID before requesting a reset.");
@@ -171,6 +264,11 @@ public class App {
         }
     }
 
+    /**
+     * Routes an authenticated user to their corresponding menu based on runtime type.
+     *
+     * @param user logged-in user
+     */
     private void routeUser(User user) {
         switch (user) {
             case Student student -> studentMenu.show(student);
@@ -180,6 +278,9 @@ public class App {
         }
     }
 
+    /**
+     * Handles the top-level registration flow for different user types.
+     */
     private void handleRegistration() {
         System.out.println("Select user type to register:");
         System.out.println("1. Student");
@@ -196,6 +297,9 @@ public class App {
         }
     }
 
+    /**
+     * Handles registration of a new student user, including validation and CSV persistence.
+     */
     private void registerStudent() {
         String id = console.readLine("Student ID (e.g., U1234567A): ").toUpperCase();
         if (!STUDENT_ID_PATTERN.matcher(id).matches()) {
@@ -243,6 +347,9 @@ public class App {
         }
     }
 
+    /**
+     * Handles registration of a new company representative, including CSV persistence and staff notification.
+     */
     private void registerCompanyRep() {
         String id = console.readLine("Company Rep ID (email): ");
         if (!EMAIL_PATTERN.matcher(id).matches()) {
@@ -291,6 +398,9 @@ public class App {
         }
     }
 
+    /**
+     * Handles registration of a new Career Center Staff member, including CSV persistence.
+     */
     private void registerCareerCenterStaff() {
         String id = console.readLine("Staff ID (e.g., abc123): ");
         if (!STAFF_ID_PATTERN.matcher(id).matches()) {
@@ -333,21 +443,37 @@ public class App {
         }
     }
 
+    /**
+     * Persists a new student record in the student CSV file.
+     */
     private void persistStudentRecord(String id, String name, String major, int year, String email) {
         String line = String.join(",", id, name, major, String.valueOf(year), email);
         appendCsvLine(studentDataPath, STUDENT_HEADER, line);
     }
 
+    /**
+     * Persists a new company representative record in the company CSV file.
+     */
     private void persistCompanyRepRecord(String id, String name, String company, String department, String position) {
         String line = String.join(",", id, name, company, department, position, id, "false");
         appendCsvLine(companyDataPath, COMPANY_HEADER, line);
     }
 
+    /**
+     * Persists a new staff record in the staff CSV file.
+     */
     private void persistStaffRecord(String id, String name, String department, String email) {
         String line = String.join(",", id, name, "Career Center Staff", department, email);
         appendCsvLine(staffDataPath, STAFF_HEADER, line);
     }
 
+    /**
+     * Appends a line to a CSV file, creating it with a header if it does not yet exist.
+     *
+     * @param path   file path
+     * @param header header line to write if file does not exist
+     * @param line   data line to append
+     */
     private void appendCsvLine(String path, String header, String line) {
         File file = new File(path);
         boolean exists = file.exists();
@@ -363,6 +489,14 @@ public class App {
         }
     }
 
+    /**
+     * Checks whether a given email already exists in a specific CSV file.
+     *
+     * @param path             CSV file path
+     * @param emailColumnIndex zero-based index of email column
+     * @param targetEmail      email to search for
+     * @return true if email already exists, false otherwise
+     */
     private boolean emailExistsInCsv(String path, int emailColumnIndex, String targetEmail) {
         if (targetEmail == null || targetEmail.isBlank()) {
             return false;
@@ -394,6 +528,11 @@ public class App {
         return false;
     }
 
+    /**
+     * Handles in-session password change for a logged-in user.
+     *
+     * @param user the user who is changing their password
+     */
     private void handlePasswordChange(User user) {
         while (true) {
             String newPassword = console.readLine("New password (min 8 chars, type 'cancel' to exit): ");
@@ -416,6 +555,11 @@ public class App {
         }
     }
 
+    /**
+     * Retrieves and displays notifications for the given user.
+     *
+     * @param user user whose notifications should be displayed
+     */
     private void displayNotifications(User user) {
         if (user == null) {
             return;
@@ -431,6 +575,12 @@ public class App {
         System.out.println("---------------------");
     }
 
+    /**
+     * Updates the approval status of a company representative in the backing CSV file.
+     *
+     * @param repId    representative ID (email)
+     * @param approved new approval status
+     */
     private void updateCompanyRepApproval(String repId, boolean approved) {
         File file = new File(companyDataPath);
         if (!file.exists() || repId == null || repId.isBlank()) {
