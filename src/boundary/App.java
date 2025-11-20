@@ -215,6 +215,10 @@ public class App {
             System.out.println("A valid NTU email is required.");
             return;
         }
+        if (emailExistsInCsv(studentDataPath, 4, email)) {
+            System.out.println("This email is already registered.");
+            return;
+        }
         Integer year = console.readInt("Year of Study (1-4, or type 'cancel'): ", 1, 4, null, true);
         if (year == null) {
             System.out.println("Registration cancelled.");
@@ -248,6 +252,10 @@ public class App {
         String password = console.promptPasswordInput("Password (min 8 chars): ");
         if (password == null) {
             System.out.println("Registration cancelled.");
+            return;
+        }
+        if (emailExistsInCsv(companyDataPath, 5, id)) {
+            System.out.println("This email is already registered.");
             return;
         }
         String companyName = console.readLine("Company Name: ");
@@ -297,6 +305,10 @@ public class App {
             System.out.println("A valid NTU email is required.");
             return;
         }
+        if (emailExistsInCsv(staffDataPath, 4, email)) {
+            System.out.println("This email is already registered.");
+            return;
+        }
         if (!console.promptYesNo("Confirm staff registration? (y/n): ", true)) {
             System.out.println("Registration cancelled.");
             return;
@@ -338,6 +350,37 @@ public class App {
         } catch (IOException e) {
             System.err.println("Failed to persist record to " + path + ": " + e.getMessage());
         }
+    }
+
+    private boolean emailExistsInCsv(String path, int emailColumnIndex, String targetEmail) {
+        if (targetEmail == null || targetEmail.isBlank()) {
+            return false;
+        }
+        File file = new File(path);
+        if (!file.exists()) {
+            return false;
+        }
+        String normalizedTarget = targetEmail.trim().toLowerCase();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            boolean headerSkipped = false;
+            while ((line = reader.readLine()) != null) {
+                if (!headerSkipped) {
+                    headerSkipped = true;
+                    continue;
+                }
+                String[] tokens = line.split(",", -1);
+                if (tokens.length > emailColumnIndex) {
+                    String existing = tokens[emailColumnIndex].trim().toLowerCase();
+                    if (!existing.isEmpty() && existing.equals(normalizedTarget)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to read " + path + " while checking duplicate emails: " + e.getMessage());
+        }
+        return false;
     }
 
     private void handlePasswordChange(User user) {
