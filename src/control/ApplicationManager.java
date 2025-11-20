@@ -1,3 +1,5 @@
+// documented
+
 package control;
 
 import entity.Application;
@@ -15,12 +17,48 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Manages all operations related to student internship applications.
+ *
+ * <p>This class handles:</p>
+ * <ul>
+ *     <li>Submitting applications</li>
+ *     <li>Applying all eligibility and system rules</li>
+ *     <li>Updating application statuses</li>
+ *     <li>Assigning and releasing internship slots</li>
+ *     <li>Sending notifications through {@link NotificationManager}</li>
+ * </ul>
+ *
+ * <p>The manager enforces a maximum of 3 active applications per student.</p>
+ */
+
 public class ApplicationManager {
+
+    /** Maximum number of applications a student may have that are pending or successful. */
     private static final int MAX_ACTIVE_APPLICATIONS = 3;
+
+    /** Stores submission log messages (informational only). */
     private final List<String> submissionNotifications = new ArrayList<>();
+
+    /** Stores the reason for the last application rule failure. */
     private String Reason = "";
+
+    /** Handles delivery of notifications to students and company representatives. */
     private NotificationManager notificationManager;
 
+    /**
+     * Submits an application for a student to an internship.
+     *
+     * <p>All eligibility rules are checked via {@link #enforceRules(Student, Internship)}.
+     * If any rule fails, an exception is thrown containing the failure reason.</p>
+     *
+     * @param student     the student applying
+     * @param internship  the target internship
+     * @return the created {@link Application}
+     *
+     * @throws IllegalArgumentException if either argument is null
+     * @throws IllegalStateException    if application violates a system rule
+     */
     public Application submitApplication(Student student, Internship internship) {
         if (student == null || internship == null) {
             throw new IllegalArgumentException("Student and internship are required.");
@@ -38,10 +76,23 @@ public class ApplicationManager {
         return application;
     }
 
+    /**
+     * Updates the status of an application.
+     *
+     * @param application the application to update
+     * @param status      new status
+     */
     public void updateStatus(Application application, ApplicationStatus status) {
         updateStatus(application, status, false);
     }
 
+    /**
+     * Updates the status of an application, optionally confirming an offer.
+     *
+     * @param application  the target application
+     * @param status       new status
+     * @param confirmOffer whether the status update is part of final offer acceptance
+     */
     public void updateStatus(Application application, ApplicationStatus status, boolean confirmOffer) {
         if (application == null || status == null) {
             return;
@@ -58,6 +109,25 @@ public class ApplicationManager {
         }
     }
 
+    /**
+     * Applies all system rules to validate whether a student may apply to an internship.
+     *
+     * <p>Checks include:</p>
+     * <ul>
+     *     <li>Internship is approved and visible</li>
+     *     <li>Major matches</li>
+     *     <li>Correct internship level for year of study</li>
+     *     <li>Application period is open</li>
+     *     <li>Student has fewer than 3 active applications</li>
+     *     <li>Student has not already applied for the same internship</li>
+     *     <li>Student has not already accepted another placement</li>
+     *     <li>Internship still has open slots</li>
+     * </ul>
+     *
+     * @param student     the student
+     * @param internship  the internship
+     * @return true if all rules pass, false otherwise (reason stored in {@link #Reason})
+     */
     public boolean enforceRules(Student student, Internship internship) {
         if (student == null || internship == null) {
             Reason = "Student and internship are required.";
@@ -119,14 +189,30 @@ public class ApplicationManager {
         return true;
     }
 
+    /**
+     * Returns the last rule failure message from {@link #enforceRules}.
+     *
+     * @return the last failure reason
+     */
     public String getLastFailureReason() {
         return Reason;
     }
 
+    /**
+     * Assigns a notification manager.
+     *
+     * @param notificationManager notification manager instance
+     */
     public void setNotificationManager(NotificationManager notificationManager) {
         this.notificationManager = notificationManager;
     }
 
+    /**
+     * Assigns the student to the first available internship slot.
+     * If the internship becomes full, remaining applications are marked unsuccessful.
+     *
+     * @param application the successful application
+     */
     private void assignSlot(Application application) {
         Internship internship = application.getInternship();
         for (InternshipSlot slot : internship.getSlots()) {
@@ -141,6 +227,11 @@ public class ApplicationManager {
         }
     }
 
+    /**
+     * Releases the slot assigned to the application's student.
+     *
+     * @param application the application being released
+     */
     private void releaseSlot(Application application) {
         Internship internship = application.getInternship();
         for (InternshipSlot slot : internship.getSlots()) {
@@ -152,6 +243,12 @@ public class ApplicationManager {
         }
     }
 
+    /**
+     * Marks all applications for the internship as unsuccessful if the applicant
+     * did not receive a slot.
+     *
+     * @param internship the internship
+     */
     private void markUnassignedApplicationsUnsuccessful(Internship internship) {
         if (internship == null) {
             return;
@@ -164,6 +261,13 @@ public class ApplicationManager {
         }
     }
 
+    /**
+     * Checks whether the student is assigned to any slot of the internship.
+     *
+     * @param internship the internship
+     * @param student    the student
+     * @return true if assigned, false otherwise
+     */
     private boolean isStudentAssignedToInternship(Internship internship, Student student) {
         if (internship == null || student == null) {
             return false;
@@ -176,6 +280,12 @@ public class ApplicationManager {
         return false;
     }
 
+    /**
+     * Notifies the student when their application is marked as successful
+     * (offer awaiting acceptance).
+     *
+     * @param application the successful application
+     */
     private void notifyStudentOfSuccessfulApplication(Application application) {
         if (notificationManager == null) {
             return;
@@ -183,6 +293,12 @@ public class ApplicationManager {
         notificationManager.notifyStudentOfferAwaitingAcceptance(application);
     }
 
+    /**
+     * Notifies the company representative when a new application is received.
+     *
+     * @param student     the applicant
+     * @param internship  the target internship
+     */
     private void notifyRepOfNewApplication(Student student, Internship internship) {
         if (notificationManager == null || student == null || internship == null) {
             return;
