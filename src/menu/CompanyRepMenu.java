@@ -173,22 +173,27 @@ public class CompanyRepMenu {
         if (selection == null) {
             return;
         }
-        List<Application> applications = selection.getApplications();
-        if (applications.isEmpty()) {
-            System.out.println("No applications submitted yet.");
+        List<Application> actionable = new ArrayList<>();
+        for (Application application : selection.getApplications()) {
+            if (application.getStatus() != ApplicationStatus.UNSUCCESSFUL) {
+                actionable.add(application);
+            }
+        }
+        if (actionable.isEmpty()) {
+            System.out.println("No applications available to manage.");
             return;
         }
         System.out.println("\nApplications for " + selection.getTitle() + ":");
         int index = 1;
-        for (Application application : applications) {
+        for (Application application : actionable) {
             System.out.println(index++ + ". " + application.getStudent().getName()
                     + " - " + application.getStatus());
         }
-        int selectionIndex = console.readInt("Select application to update (0 to cancel): ", 0, applications.size());
+        int selectionIndex = console.readInt("Select application to update (0 to cancel): ", 0, actionable.size());
         if (selectionIndex == 0) {
             return;
         }
-        Application target = applications.get(selectionIndex - 1);
+        Application target = actionable.get(selectionIndex - 1);
         System.out.println("1. Successful");
         System.out.println("2. Unsuccessful");
         int choice = console.readInt("Select new status: ", 1, 2);
