@@ -148,6 +148,7 @@ public class ApplicationManager {
                 slot.release();
                 internship.setStatus(InternshipStatus.APPROVED);
                 break;
+            }
         }
     }
 
@@ -174,7 +175,6 @@ public class ApplicationManager {
         }
         return false;
     }
-}
 
     private void notifyStudentOfSuccessfulApplication(Application application) {
         if (notificationManager == null) {
@@ -193,5 +193,4 @@ public class ApplicationManager {
         }
         notificationManager.notifyRepNewApplication(rep, student, internship);
     }
-
 }
