@@ -101,7 +101,16 @@ public class InternshipManager {
         if (rep == null || targets == null || targets.isEmpty()) {
             return;
         }
-        internships.removeIf(internship ->
-                internship.getRepInCharge() == rep && targets.contains(internship));
+        List<Internship> removed = new ArrayList<>();
+        internships.removeIf(internship -> {
+            boolean match = internship.getRepInCharge() == rep && targets.contains(internship);
+            if (match) {
+                removed.add(internship);
+            }
+            return match;
+        });
+        for (Internship internship : removed) {
+            rep.removeInternship(internship);
+        }
     }
 }

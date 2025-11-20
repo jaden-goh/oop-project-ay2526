@@ -137,6 +137,10 @@ public class CompanyRepMenu {
         String preferredMajor = console.promptPreferredMajorSelection();
         LocalDate openDate = console.readOptionalDate("Open date (yyyy-MM-dd, blank for immediate): ");
         LocalDate closeDate = console.readOptionalDate("Close date (yyyy-MM-dd, blank for none): ");
+        if (closeDate != null && closeDate.isBefore(LocalDate.now())) {
+            System.out.println("Closing date cannot be in the past.");
+            return;
+        }
         if (openDate != null && closeDate != null && closeDate.isBefore(openDate)) {
             System.out.println("Closing date cannot be earlier than the opening date.");
             return;

@@ -57,6 +57,12 @@ public class CompanyRep extends User {
         if (slotCount < 1 || slotCount > MAX_SLOTS) {
             throw new IllegalArgumentException("Slot count must be between 1 and " + MAX_SLOTS);
         }
+        if (closeDate != null && closeDate.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Closing date cannot be in the past.");
+        }
+        if (openDate != null && closeDate != null && closeDate.isBefore(openDate)) {
+            throw new IllegalArgumentException("Closing date cannot be earlier than the opening date.");
+        }
         Internship internship = new Internship(title, description, companyName, this);
         internship.setLevel(level);
         internship.setPreferredMajor(preferredMajor);
@@ -92,6 +98,10 @@ public class CompanyRep extends User {
         if (on && internship.getStatus() == InternshipStatus.PENDING) {
             manager.approveInternship(internship);
         }
+    }
+
+    public void removeInternship(Internship internship) {
+        internships.remove(internship);
     }
 
     public List<Internship> getInternships(InternshipManager manager) {

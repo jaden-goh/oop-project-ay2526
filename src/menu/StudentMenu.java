@@ -103,6 +103,10 @@ public class StudentMenu {
         if (selection == null) {
             return;
         }
+        if (!console.promptYesNo("Submit application for " + selection.getTitle() + "? (y/n): ", true)) {
+            System.out.println("Application cancelled.");
+            return;
+        }
         if (student.apply(selection, applicationManager)) {
             System.out.println("Application submitted for " + selection.getTitle());
         } else {
