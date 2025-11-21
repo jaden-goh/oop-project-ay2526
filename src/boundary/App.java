@@ -91,7 +91,11 @@ public class App {
                     }
                 }
                 case "2" -> handleRegistration();
-                case "3" -> running = false;
+                case "3" -> {
+                    if (console.promptYesNo("Quit the application? (y/n): ", false)) {
+                        running = false;
+                    }
+                }
                 default -> System.out.println("Invalid choice. Please try again.");
             }
             System.out.println();
